@@ -49,6 +49,7 @@ use hbb_common::{
     config::{
         self, keys, use_ws, Config, LocalConfig, PeerConfig, PeerInfoSerde, Resolution,
         CONNECT_TIMEOUT, READ_TIMEOUT, RELAY_PORT, RENDEZVOUS_PORT, RENDEZVOUS_SERVERS,
+        WS_RENDEZVOUS_PORT,
     },
     fs::JobType,
     futures::future::{select_ok, FutureExt},
@@ -254,7 +255,7 @@ impl Client {
         if hbb_common::is_ip_str(peer) {
             return Ok((
                 (
-                    connect_tcp_local(check_port(peer, RELAY_PORT + 1), None, CONNECT_TIMEOUT)
+                    connect_tcp_local(check_port(peer, WS_RENDEZVOUS_PORT), None, CONNECT_TIMEOUT)
                         .await?,
                     true,
                     None,

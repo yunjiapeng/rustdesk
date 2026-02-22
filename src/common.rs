@@ -627,7 +627,13 @@ async fn test_nat_type_() -> ResultType<bool> {
     log::info!("Testing nat ...");
     let start = std::time::Instant::now();
     let server1 = Config::get_rendezvous_server();
-    let server2 = crate::increase_port(&server1, -1);
+    let server2 = {
+        let (mut host, _) = socket_client::split_host_port(&server1).unwrap_or((server1.clone(), 0));
+        if host.starts_with('[') && host.ends_with(']') {
+            host = host[1..host.len() - 1].to_string();
+        }
+        crate::check_port(host, config::NAT_TEST_PORT)
+    };
     let mut msg_out = RendezvousMessage::new();
     let serial = Config::get_serial();
     msg_out.set_test_nat_request(TestNatRequest {
@@ -1081,12 +1087,14 @@ fn get_api_server_(api: String, custom: String) -> String {
             return format!("http://{}", s);
         }
     }
-    "https://admin.rustdesk.com".to_owned()
+    "".to_owned()
 }
 
 #[inline]
 pub fn is_public(url: &str) -> bool {
-    url.contains("rustdesk.com/") || url.ends_with("rustdesk.com")
+    url.contains("rustdesk.com/")
+        || url.ends_with("rustdesk.com")
+        || config::RENDEZVOUS_SERVERS.iter().any(|s| url.contains(s))
 }
 
 pub fn get_udp_punch_enabled() -> bool {

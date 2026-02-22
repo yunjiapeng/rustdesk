@@ -13,7 +13,8 @@ use hbb_common::{
     allow_err,
     anyhow::{self, bail},
     config::{
-        self, keys::*, option2bool, use_ws, Config, CONNECT_TIMEOUT, REG_INTERVAL, RENDEZVOUS_PORT,
+        self, keys::*, option2bool, use_ws, Config, CONNECT_TIMEOUT, REG_INTERVAL, RELAY_PORT,
+        RENDEZVOUS_PORT, WS_RENDEZVOUS_PORT,
     },
     futures::future::join_all,
     log,
@@ -745,7 +746,12 @@ impl RendezvousMediator {
             relay_server = provided_by_rendezvous_server;
         }
         if relay_server.is_empty() {
-            relay_server = crate::increase_port(&self.host, 1);
+            let (mut host, _) =
+                socket_client::split_host_port(&self.host).unwrap_or((self.host.clone(), 0));
+            if host.starts_with('[') && host.ends_with(']') {
+                host = host[1..host.len() - 1].to_string();
+            }
+            relay_server = check_port(host, RELAY_PORT);
         }
         relay_server
     }
@@ -756,7 +762,7 @@ fn get_direct_port() -> i32 {
         .parse::<i32>()
         .unwrap_or(0);
     if port <= 0 {
-        port = RENDEZVOUS_PORT + 2;
+        port = WS_RENDEZVOUS_PORT;
     }
     port
 }
