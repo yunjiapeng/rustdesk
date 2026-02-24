@@ -384,6 +384,7 @@ mod cpal_impl {
         ))
     }
 
+    #[cfg(feature = "use_dasp")]
     fn build_input_stream<T>(
         device: cpal::Device,
         config: &cpal::SupportedStreamConfig,
@@ -424,6 +425,64 @@ mod cpal_impl {
             &stream_config,
             move |data: &[T], _: &InputCallbackInfo| {
                 let buffer: Vec<f32> = data.iter().map(|s| T::to_sample(*s)).collect();
+                let mut lock = INPUT_BUFFER.lock().unwrap();
+                lock.extend(buffer);
+                while lock.len() >= rechannel_len {
+                    let frame: Vec<f32> = lock.drain(0..rechannel_len).collect();
+                    send(
+                        frame,
+                        sample_rate_0,
+                        sample_rate,
+                        device_channel,
+                        encode_channel as _,
+                        &mut encoder,
+                        &sp,
+                    );
+                }
+            },
+            err_fn,
+            timeout,
+        )?;
+        Ok(stream)
+    }
+
+    #[cfg(not(feature = "use_dasp"))]
+    fn build_input_stream<T>(
+        device: cpal::Device,
+        config: &cpal::SupportedStreamConfig,
+        sp: GenericService,
+        sample_rate: u32,
+        encode_channel: magnum_opus::Channels,
+    ) -> ResultType<cpal::Stream>
+    where
+        T: cpal::Sample + cpal::SizedSample,
+        f32: cpal::FromSample<T>,
+    {
+        use cpal::Sample;
+        let err_fn = move |err| {
+            log::trace!("an error occurred on stream: {}", err);
+        };
+        let sample_rate_0 = config.sample_rate().0;
+        log::debug!("Audio sample rate : {}", sample_rate);
+        unsafe {
+            AUDIO_ZERO_COUNT = 0;
+        }
+        let device_channel = config.channels();
+        let mut encoder = Encoder::new(sample_rate, encode_channel, LowDelay)?;
+        let frame_size = sample_rate_0 as usize / 100;
+        let encode_len = frame_size * encode_channel as usize;
+        let rechannel_len = encode_len * device_channel as usize / encode_channel as usize;
+        INPUT_BUFFER.lock().unwrap().clear();
+        let timeout = None;
+        let stream_config = StreamConfig {
+            channels: device_channel,
+            sample_rate: config.sample_rate(),
+            buffer_size: BufferSize::Default,
+        };
+        let stream = device.build_input_stream(
+            &stream_config,
+            move |data: &[T], _: &InputCallbackInfo| {
+                let buffer: Vec<f32> = data.iter().map(|&s| s.to_sample::<f32>()).collect();
                 let mut lock = INPUT_BUFFER.lock().unwrap();
                 lock.extend(buffer);
                 while lock.len() >= rechannel_len {

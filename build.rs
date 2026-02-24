@@ -89,6 +89,8 @@ fn main() {
         #[cfg(target_os = "macos")]
         build_mac();
         println!("cargo:rustc-link-lib=framework=ApplicationServices");
+        #[cfg(feature = "screencapturekit")]
+        println!("cargo:rustc-link-lib=framework=ScreenCaptureKit");
     }
     println!("cargo:rerun-if-changed=build.rs");
 }

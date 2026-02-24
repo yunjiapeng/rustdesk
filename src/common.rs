@@ -407,6 +407,47 @@ pub fn audio_resample(
     .unwrap_or_default()
 }
 
+#[cfg(not(any(feature = "use_dasp", feature = "use_samplerate")))]
+pub fn audio_resample(
+    data: &[f32],
+    sample_rate0: u32,
+    sample_rate: u32,
+    channels: u16,
+) -> Vec<f32> {
+    if sample_rate0 == sample_rate {
+        return data.to_vec();
+    }
+    let channels = channels as usize;
+    if channels == 0 {
+        return Vec::new();
+    }
+    let frames_in = data.len() / channels;
+    if frames_in == 0 {
+        return Vec::new();
+    }
+    let frames_out = frames_in * sample_rate as usize / sample_rate0 as usize;
+    if frames_out == 0 {
+        return Vec::new();
+    }
+    if frames_out == 1 {
+        return data[..channels.min(data.len())].to_vec();
+    }
+    let mut out = Vec::with_capacity(frames_out * channels);
+    let max_idx = frames_in - 1;
+    for i in 0..frames_out {
+        let pos = i as f32 * max_idx as f32 / (frames_out - 1) as f32;
+        let idx = pos.floor() as usize;
+        let frac = pos - idx as f32;
+        let next = (idx + 1).min(max_idx);
+        for ch in 0..channels {
+            let a = data[idx * channels + ch];
+            let b = data[next * channels + ch];
+            out.push(a + (b - a) * frac);
+        }
+    }
+    out
+}
+
 pub fn audio_rechannel(
     input: Vec<f32>,
     in_hz: u32,
