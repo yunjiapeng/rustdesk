@@ -161,7 +161,7 @@ void runMainApp(bool startService) async {
     await restoreWindowPosition(WindowType.Main);
     if (isDesktop) {
       final fixedSize = Size(
-          kDesktopDefaultDisplayWidth.toDouble(),
+          kDesktopDefaultDisplayWidth * 0.95,
           kDesktopDefaultDisplayHeight * 0.9);
       await windowManager.setSize(fixedSize);
       setResizable(false);
