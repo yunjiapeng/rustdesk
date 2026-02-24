@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "Purslane Ltd" "\0"
-            VALUE "FileDescription", "RustDesk Remote Desktop" "\0"
+            VALUE "FileDescription", "YunDesk Remote Desktop" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "RustDesk" "\0"
+            VALUE "InternalName", "YunDesk" "\0"
             VALUE "LegalCopyright", "Copyright © 2025 Purslane Ltd. All rights reserved." "\0"
-            VALUE "OriginalFilename", "RustDesk.exe" "\0"
-            VALUE "ProductName", "RustDesk" "\0"
+            VALUE "OriginalFilename", "YunDesk.exe" "\0"
+            VALUE "ProductName", "YunDesk" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

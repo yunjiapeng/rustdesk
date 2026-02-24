@@ -5,25 +5,25 @@ set -e
 if [ "$1" = configure ]; then
 
 	INITSYS=$(ls -al /proc/1/exe | awk -F' ' '{print $NF}' | awk -F'/' '{print $NF}')
-	ln -f -s /usr/share/RustDesk/RustDesk /usr/bin/RustDesk
+	ln -f -s /usr/share/YunDesk/YunDesk /usr/bin/YunDesk
 	
 	if [ "systemd" == "$INITSYS" ]; then
 
-		if [ -e /etc/systemd/system/RustDesk.service ]; then
-			rm /etc/systemd/system/RustDesk.service /usr/lib/systemd/system/RustDesk.service /usr/lib/systemd/user/RustDesk.service >/dev/null  2>&1
+	if [ -e /etc/systemd/system/YunDesk.service ]; then
+		rm /etc/systemd/system/YunDesk.service /usr/lib/systemd/system/YunDesk.service /usr/lib/systemd/user/YunDesk.service >/dev/null  2>&1
 		fi
 		version=$(python3 -V 2>&1 | grep -Po '(?<=Python )(.+)')
 		parsedVersion=$(echo "${version//./}")
         mkdir -p /usr/lib/systemd/system/
-		cp /usr/share/RustDesk/files/systemd/RustDesk.service /usr/lib/systemd/system/RustDesk.service
+	cp /usr/share/YunDesk/files/systemd/YunDesk.service /usr/lib/systemd/system/YunDesk.service
 		# try fix error in Ubuntu 18.04
-		# Failed to reload RustDesk.service: Unit RustDesk.service is not loaded properly: Exec format error.
-		# /usr/lib/systemd/system/RustDesk.service:10: Executable path is not absolute: pkill -f "RustDesk --"
+	# Failed to reload YunDesk.service: Unit YunDesk.service is not loaded properly: Exec format error.
+	# /usr/lib/systemd/system/YunDesk.service:10: Executable path is not absolute: pkill -f "YunDesk --"
 		if [ -e /usr/bin/pkill ]; then
-			sed -i "s|pkill|/usr/bin/pkill|g" /usr/lib/systemd/system/RustDesk.service
+		sed -i "s|pkill|/usr/bin/pkill|g" /usr/lib/systemd/system/YunDesk.service
 		fi
 		systemctl daemon-reload
-		systemctl enable RustDesk
-		systemctl start RustDesk
+	systemctl enable YunDesk
+	systemctl start YunDesk
 	fi
 fi

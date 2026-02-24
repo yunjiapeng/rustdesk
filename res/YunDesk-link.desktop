@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=YunDesk
+NoDisplay=true
+MimeType=x-scheme-handler/YunDesk;
+TryExec=YunDesk
+Exec=YunDesk %u
+Icon=YunDesk
+Terminal=false
+Type=Application
+StartupNotify=false
+StartupWMClass=YunDesk

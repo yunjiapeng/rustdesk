@@ -373,7 +373,8 @@ class LoginWidgetUserPass extends StatelessWidget {
                         style: TextStyle(fontSize: 16),
                       ),
                       onPressed:
-                          curOP.value.isEmpty || curOP.value == 'RustDesk'
+                          curOP.value.isEmpty ||
+                                  curOP.value == bind.mainGetAppNameSync()
                               ? () {
                                   onLogin();
                                 }

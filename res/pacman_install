@@ -5,43 +5,43 @@
 # arg 1:  the new package version
 post_install() {
 	# do something here
-	cp /usr/share/RustDesk/files/RustDesk.service /etc/systemd/system/RustDesk.service
-	cp /usr/share/RustDesk/files/RustDesk.desktop /usr/share/applications/
-	cp /usr/share/RustDesk/files/RustDesk-link.desktop /usr/share/applications/
+	cp /usr/share/YunDesk/files/YunDesk.service /etc/systemd/system/YunDesk.service
+	cp /usr/share/YunDesk/files/YunDesk.desktop /usr/share/applications/
+	cp /usr/share/YunDesk/files/YunDesk-link.desktop /usr/share/applications/
 	systemctl daemon-reload
-	systemctl enable RustDesk
-	systemctl start RustDesk
+	systemctl enable YunDesk
+	systemctl start YunDesk
 	update-desktop-database
 }
 
 # arg 1:  the new package version
 # arg 2:  the old package version
 pre_upgrade() {
-    systemctl stop RustDesk || true
+    systemctl stop YunDesk || true
 }
 
 # arg 1:  the new package version
 # arg 2:  the old package version
 post_upgrade() {
-	cp /usr/share/RustDesk/files/RustDesk.service /etc/systemd/system/RustDesk.service
-	cp /usr/share/RustDesk/files/RustDesk.desktop /usr/share/applications/
-	cp /usr/share/RustDesk/files/RustDesk-link.desktop /usr/share/applications/
+	cp /usr/share/YunDesk/files/YunDesk.service /etc/systemd/system/YunDesk.service
+	cp /usr/share/YunDesk/files/YunDesk.desktop /usr/share/applications/
+	cp /usr/share/YunDesk/files/YunDesk-link.desktop /usr/share/applications/
 	systemctl daemon-reload
-	systemctl enable RustDesk
-	systemctl start RustDesk
+	systemctl enable YunDesk
+	systemctl start YunDesk
 	update-desktop-database
 }
 
 # arg 1:  the old package version
 pre_remove() {
-	systemctl stop RustDesk || true
-	systemctl disable RustDesk || true
-	rm /etc/systemd/system/RustDesk.service || true
+	systemctl stop YunDesk || true
+	systemctl disable YunDesk || true
+	rm /etc/systemd/system/YunDesk.service || true
 }
 
 # arg 1:  the old package version
 post_remove() {
-	rm /usr/share/applications/RustDesk.desktop || true
-	rm /usr/share/applications/RustDesk-link.desktop || true
+	rm /usr/share/applications/YunDesk.desktop || true
+	rm /usr/share/applications/YunDesk-link.desktop || true
 	update-desktop-database
 }

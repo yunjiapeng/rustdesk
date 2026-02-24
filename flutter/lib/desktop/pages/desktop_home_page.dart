@@ -1506,8 +1506,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final items = [
       ('远程协助', Icons.desktop_windows_outlined),
       ('设备', Icons.devices_outlined),
-      ('工具包', Icons.widgets_outlined),
-      ('贝锐', Icons.stars_outlined),
     ];
     return Column(
       children: [
@@ -2033,11 +2031,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     if (!bind.isCustomClient() &&
         updateUrl.isNotEmpty &&
         !isCardClosed &&
-        bind.mainUriPrefixSync().contains('RustDesk')) {
+        bind.mainUriPrefixSync().contains('YunDesk')) {
       final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
       String btnText = isToUpdate ? 'Update' : 'Download';
       GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://RustDesk.com/download');
+        final Uri url = Uri.parse('https://YunDesk.com/download');
         await launchUrl(url);
       };
       if (isToUpdate) {
@@ -2053,7 +2051,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           closeButton: true,
           help: isToUpdate ? 'Changelog' : null,
           link: isToUpdate
-              ? 'https://github.com/RustDesk/RustDesk/releases/tag/${bind.mainGetNewVersion()}'
+              ? 'https://github.com/YunDesk/YunDesk/releases/tag/${bind.mainGetNewVersion()}'
               : null);
     }
     if (systemError.isNotEmpty) {
@@ -2130,7 +2128,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Help',
             link:
-                'https://RustDesk.com/docs/en/client/linux/#permissions-issue',
+                'https://YunDesk.com/docs/en/client/linux/#permissions-issue',
             closeButton: true,
             closeOption: keyShowSelinuxHelpTip,
           ));
@@ -2141,13 +2139,13 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             "Warning", "wayland_experiment_tip", "", () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Help',
-            link: 'https://RustDesk.com/docs/en/client/linux/#x11-required'));
+            link: 'https://YunDesk.com/docs/en/client/linux/#x11-required'));
       } else if (bind.mainIsLoginWayland()) {
         LinuxCards.add(buildInstallCard("Warning",
             "Login screen using Wayland is not supported", "", () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Help',
-            link: 'https://RustDesk.com/docs/en/client/linux/#login-screen'));
+            link: 'https://YunDesk.com/docs/en/client/linux/#login-screen'));
       }
       if (LinuxCards.isNotEmpty) {
         return Column(

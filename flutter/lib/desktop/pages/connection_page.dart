@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/models/state_model.dart';
@@ -29,6 +30,9 @@ class OnlineStatusWidget extends StatefulWidget {
 class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   final _svcStopped = Get.find<RxBool>(tag: 'stop-service');
   Timer? _updateTimer;
+  HttpServer? _webAuthLoopbackServer;
+  Timer? _webAuthLoopbackTimeout;
+  static const _webAuthLoopbackPort = 27182;
 
   double get em => 14.0;
   double? get height => bind.isIncomingOnly() ? null : em * 3;
@@ -44,6 +48,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   @override
   void dispose() {
     _updateTimer?.cancel();
+    _stopWebAuthLoopbackServer();
     super.dispose();
   }
 
@@ -93,7 +98,7 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
         children: [
           Text('服务未运行 ', style: TextStyle(fontSize: em)),
           InkWell(
-            onTap: () => launchUrl(Uri.parse('http://202.189.23.82:20101')),
+            onTap: _startWebAuthLogin,
             child: Text(
               '请先登录',
               style: TextStyle(
@@ -113,6 +118,94 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
               : translate('Ready'),
       style: TextStyle(fontSize: em),
     );
+  }
+
+  Future<void> _startWebAuthLogin() async {
+    final url = bind.mainGetLocalOption(key: 'webauth_login_url');
+    final target = url.isNotEmpty ? url : 'http://202.189.23.82:20101';
+    final loginUrl = await _prepareWebAuthLoginUrl(target);
+    await launchUrl(Uri.parse(loginUrl));
+  }
+
+  Future<String> _prepareWebAuthLoginUrl(String url) async {
+    final redirectUri = await _startWebAuthLoopbackServer();
+    if (redirectUri == null) {
+      return url;
+    }
+    if (url.contains('{redirect_uri}')) {
+      return url.replaceAll('{redirect_uri}', Uri.encodeComponent(redirectUri));
+    }
+    final parsed = Uri.tryParse(url);
+    if (parsed == null || !parsed.hasScheme) {
+      return url;
+    }
+    if (parsed.queryParameters.containsKey('redirect_uri')) {
+      return url;
+    }
+    final params = Map<String, String>.from(parsed.queryParameters);
+    params['redirect_uri'] = redirectUri;
+    return parsed.replace(queryParameters: params).toString();
+  }
+
+  Future<String?> _startWebAuthLoopbackServer() async {
+    if (!isDesktop) {
+      return null;
+    }
+    if (_webAuthLoopbackServer != null) {
+      final port = _webAuthLoopbackServer?.port ?? _webAuthLoopbackPort;
+      return 'http://127.0.0.1:$port/login';
+    }
+    await _stopWebAuthLoopbackServer();
+    try {
+      final server = await HttpServer.bind(
+        InternetAddress.loopbackIPv4,
+        _webAuthLoopbackPort,
+      );
+      _webAuthLoopbackServer = server;
+      _webAuthLoopbackTimeout?.cancel();
+      _webAuthLoopbackTimeout =
+          Timer(const Duration(minutes: 3), _stopWebAuthLoopbackServer);
+      server.listen(_handleWebAuthLoopbackRequest);
+      return 'http://127.0.0.1:${server.port}/login';
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _handleWebAuthLoopbackRequest(HttpRequest request) async {
+    final params = request.uri.queryParameters;
+    final token = params['token'] ?? params['access_token'] ?? '';
+    final userName = params['user'] ?? params['username'] ?? '';
+    final loginUrl = params['login_url'] ?? params['url'] ?? '';
+    if (token.isNotEmpty) {
+      bind.mainSetLocalOption(key: 'webauth_token', value: token);
+    }
+    if (userName.isNotEmpty) {
+      bind.mainSetLocalOption(key: 'webauth_user', value: userName);
+    }
+    if (loginUrl.isNotEmpty) {
+      bind.mainSetLocalOption(key: 'webauth_login_url', value: loginUrl);
+    }
+    request.response.statusCode = 200;
+    request.response.headers.contentType = ContentType.html;
+    request.response.write('<html><body>登录成功，请关闭窗口</body></html>');
+    await request.response.close();
+    if (token.isNotEmpty) {
+      windowOnTop(null);
+      await _stopWebAuthLoopbackServer();
+    }
+  }
+
+  Future<void> _stopWebAuthLoopbackServer() async {
+    _webAuthLoopbackTimeout?.cancel();
+    _webAuthLoopbackTimeout = null;
+    final server = _webAuthLoopbackServer;
+    _webAuthLoopbackServer = null;
+    if (server != null) {
+      try {
+        await server.close(force: true);
+      } catch (_) {}
+    }
   }
 
   updateStatus() async {

@@ -1,4 +1,4 @@
-pkgname=RustDesk
+pkgname=YunDesk
 pkgver=1.4.5
 pkgrel=0
 epoch=
@@ -23,13 +23,13 @@ md5sums=() #generate with 'makepkg -g'
 
 package() {
   if [[ ${FLUTTER} ]]; then
-	  mkdir -p "${pkgdir}/usr/share/RustDesk" && cp -r ${HBB}/flutter/build/linux/x64/release/bundle/* -t "${pkgdir}/usr/share/RustDesk"
+	  mkdir -p "${pkgdir}/usr/share/YunDesk" && cp -r ${HBB}/flutter/build/linux/x64/release/bundle/* -t "${pkgdir}/usr/share/YunDesk"
   fi
   mkdir -p "${pkgdir}/usr/bin"
-  pushd ${pkgdir} && ln -s /usr/share/RustDesk/RustDesk usr/bin/RustDesk && popd
-  install -Dm 644 $HBB/res/RustDesk.service -t "${pkgdir}/usr/share/RustDesk/files"
-  install -Dm 644 $HBB/res/RustDesk.desktop -t "${pkgdir}/usr/share/RustDesk/files"
-  install -Dm 644 $HBB/res/RustDesk-link.desktop -t "${pkgdir}/usr/share/RustDesk/files"
-  install -Dm 644 $HBB/res/128x128@2x.png "${pkgdir}/usr/share/icons/hicolor/256x256/apps/RustDesk.png"
-  install -Dm 644 $HBB/res/scalable.svg "${pkgdir}/usr/share/icons/hicolor/scalable/apps/RustDesk.svg"
+  pushd ${pkgdir} && ln -s /usr/share/YunDesk/YunDesk usr/bin/YunDesk && popd
+  install -Dm 644 $HBB/res/YunDesk.service -t "${pkgdir}/usr/share/YunDesk/files"
+  install -Dm 644 $HBB/res/YunDesk.desktop -t "${pkgdir}/usr/share/YunDesk/files"
+  install -Dm 644 $HBB/res/YunDesk-link.desktop -t "${pkgdir}/usr/share/YunDesk/files"
+  install -Dm 644 $HBB/res/128x128@2x.png "${pkgdir}/usr/share/icons/hicolor/256x256/apps/YunDesk.png"
+  install -Dm 644 $HBB/res/scalable.svg "${pkgdir}/usr/share/icons/hicolor/scalable/apps/YunDesk.svg"
 }

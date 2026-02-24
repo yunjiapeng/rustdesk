@@ -283,7 +283,9 @@ class FfiModel with ChangeNotifier {
   String _autoScreenshotPathForPeer(String peerId) {
     final safeId = peerId.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
     final normalized = safeId.isEmpty ? 'peer' : safeId;
-    final dir = File(Platform.resolvedExecutable).parent.path;
+    final dataDir = bind.mainGetDataDirIos(appDir: '');
+    final dir =
+        dataDir.isNotEmpty ? dataDir : File(Platform.resolvedExecutable).parent.path;
     return '$dir${Platform.pathSeparator}$normalized.png';
   }
 

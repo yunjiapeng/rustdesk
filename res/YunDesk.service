@@ -1,17 +1,17 @@
 [Unit]
-Description=RustDesk
+Description=YunDesk
 Requires=network.target
 After=systemd-user-sessions.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/RustDesk --service
+ExecStart=/usr/bin/YunDesk --service
 # kill --tray and --server both
-ExecStop=pkill -f "RustDesk --"
+ExecStop=pkill -f "YunDesk --"
 # below two lines do not work, have to use above one line
-#ExecStop=pkill -f "RustDesk --tray"
-#ExecStop=pkill -f "RustDesk --server"
-PIDFile=/run/RustDesk.pid
+#ExecStop=pkill -f "YunDesk --tray"
+#ExecStop=pkill -f "YunDesk --server"
+PIDFile=/run/YunDesk.pid
 KillMode=mixed
 TimeoutStopSec=30
 User=root

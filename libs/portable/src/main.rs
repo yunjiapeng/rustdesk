@@ -17,8 +17,8 @@ const APP_METADATA: &[u8] = include_bytes!("../app_metadata.toml");
 const APP_METADATA: &[u8] = &[];
 const APP_METADATA_CONFIG: &str = "meta.toml";
 const META_LINE_PREFIX_TIMESTAMP: &str = "timestamp = ";
-const APP_PREFIX: &str = "RustDesk";
-const APPNAME_RUNTIME_ENV_KEY: &str = "RustDesk_APPNAME";
+const APP_PREFIX: &str = "YunDesk";
+const APPNAME_RUNTIME_ENV_KEY: &str = "YunDesk_APPNAME";
 #[cfg(windows)]
 const SET_FOREGROUND_WINDOW_ENV_KEY: &str = "SET_FOREGROUND_WINDOW";
 
