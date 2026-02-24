@@ -12,23 +12,23 @@
 > **免责声明:** <br>
 > RustDesk 的开发人员不纵容或支持任何不道德或非法的软件使用行为。滥用行为，例如未经授权的访问、控制或侵犯隐私，严格违反我们的准则。作者对应用程序的任何滥用行为概不负责。
 
-与我们交流: [知乎](https://www.zhihu.com/people/rustdesk) | [Discord](https://discord.gg/nDceKgxnkV) | [Reddit](https://www.reddit.com/r/rustdesk) | [YouTube](https://www.youtube.com/@rustdesk)
+与我们交流: [知乎](https://www.zhihu.com/people/RustDesk) | [Discord](https://discord.gg/nDceKgxnkV) | [Reddit](https://www.reddit.com/r/RustDesk) | [YouTube](https://www.youtube.com/@RustDesk)
 
-[![RustDesk Server Pro](https://img.shields.io/badge/RustDesk%20Server%20Pro-%E9%AB%98%E7%BA%A7%E5%8A%9F%E8%83%BD-blue)](https://rustdesk.com/pricing.html)
+[![RustDesk Server Pro](https://img.shields.io/badge/RustDesk%20Server%20Pro-%E9%AB%98%E7%BA%A7%E5%8A%9F%E8%83%BD-blue)](https://RustDesk.com/pricing.html)
 
 远程桌面软件，开箱即用，无需任何配置。您完全掌控数据，不用担心安全问题。您可以使用我们的注册/中继服务器，
-或者[自己设置](https://rustdesk.com/server)，
-亦或者[开发您的版本](https://github.com/rustdesk/rustdesk-server-demo)。
+或者[自己设置](https://RustDesk.com/server)，
+亦或者[开发您的版本](https://github.com/RustDesk/RustDesk-server-demo)。
 
 ![image](https://user-images.githubusercontent.com/71636191/171661982-430285f0-2e12-4b1d-9957-4a58e375304d.png)
 
 RustDesk 期待各位的贡献. 如何参与开发? 详情请看 [CONTRIBUTING-ZH.md](CONTRIBUTING-ZH.md).
 
-[**FAQ**](https://github.com/rustdesk/rustdesk/wiki/FAQ)
+[**FAQ**](https://github.com/RustDesk/RustDesk/wiki/FAQ)
 
-[**BINARY DOWNLOAD**](https://github.com/rustdesk/rustdesk/releases)
+[**BINARY DOWNLOAD**](https://github.com/RustDesk/RustDesk/releases)
 
-[**NIGHTLY BUILD**](https://github.com/rustdesk/rustdesk/releases/tag/nightly)
+[**NIGHTLY BUILD**](https://github.com/RustDesk/RustDesk/releases/tag/nightly)
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
     alt="Get it on F-Droid"
@@ -36,7 +36,7 @@ RustDesk 期待各位的贡献. 如何参与开发? 详情请看 [CONTRIBUTING-Z
 
 ## 依赖
 
-桌面版本使用 Flutter 或 Sciter（已弃用）作为 GUI，本教程仅适用于 Sciter，因为它更简单且更易于上手。查看我们的[CI](https://github.com/rustdesk/rustdesk/blob/master/.github/workflows/flutter-build.yml)以构建 Flutter 版本。
+桌面版本使用 Flutter 或 Sciter（已弃用）作为 GUI，本教程仅适用于 Sciter，因为它更简单且更易于上手。查看我们的[CI](https://github.com/RustDesk/RustDesk/blob/master/.github/workflows/flutter-build.yml)以构建 Flutter 版本。
 
 请自行下载Sciter动态库。
 
@@ -55,7 +55,7 @@ RustDesk 期待各位的贡献. 如何参与开发? 详情请看 [CONTRIBUTING-Z
 
 - 运行 `cargo run`
 
-## [构建](https://rustdesk.com/docs/en/dev/build/)
+## [构建](https://RustDesk.com/docs/en/dev/build/)
 
 ## 在 Linux 上编译
 
@@ -115,8 +115,8 @@ cd
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
-git clone https://github.com/rustdesk/rustdesk
-cd rustdesk
+git clone https://github.com/RustDesk/RustDesk
+cd RustDesk
 mkdir -p target/debug
 wget https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin.lnx/x64/libsciter-gtk.so
 mv libsciter-gtk.so target/debug
@@ -128,9 +128,9 @@ VCPKG_ROOT=$HOME/vcpkg cargo run
 克隆版本库并构建 Docker 容器:
 
 ```sh
-git clone https://github.com/rustdesk/rustdesk # 克隆Github存储库
-cd rustdesk # 进入文件夹
-docker build -t "rustdesk-builder" . # 构建容器
+git clone https://github.com/RustDesk/RustDesk # 克隆Github存储库
+cd RustDesk # 进入文件夹
+docker build -t "RustDesk-builder" . # 构建容器
 ```
 
 请注意：
@@ -168,7 +168,7 @@ docker build -t "rustdesk-builder" . # 构建容器
    4. docker build 命令后面加上 proxy 参数
 
       ```
-      docker build -t "rustdesk-builder" . --build-arg http_proxy=http://host:port --build-arg https_proxy=http://host:port
+      docker build -t "RustDesk-builder" . --build-arg http_proxy=http://host:port --build-arg https_proxy=http://host:port
       ```
 
 ### 构建 RustDesk 程序
@@ -176,7 +176,7 @@ docker build -t "rustdesk-builder" . # 构建容器
 然后, 每次需要构建应用程序时, 运行以下命令:
 
 ```sh
-docker run --rm -it -v $PWD:/home/user/rustdesk -v rustdesk-git-cache:/home/user/.cargo/git -v rustdesk-registry-cache:/home/user/.cargo/registry -e PUID="$(id -u)" -e PGID="$(id -g)" rustdesk-builder
+docker run --rm -it -v $PWD:/home/user/RustDesk -v RustDesk-git-cache:/home/user/.cargo/git -v RustDesk-registry-cache:/home/user/.cargo/registry -e PUID="$(id -u)" -e PGID="$(id -g)" RustDesk-builder
 ```
 
 请注意:  
@@ -195,13 +195,13 @@ docker run --rm -it -v $PWD:/home/user/rustdesk -v rustdesk-git-cache:/home/user
 
 生成的可执行程序在 target 目录下，可直接通过指令运行调试 (Debug) 版本的 RustDesk:
 ```sh
-target/debug/rustdesk
+target/debug/RustDesk
 ```
 
 或者您想运行发行 (Release) 版本:
 
 ```sh
-target/release/rustdesk
+target/release/RustDesk
 ```
 
 请注意：
@@ -210,17 +210,17 @@ target/release/rustdesk
 
 ## 文件结构
 
-- **[libs/hbb_common](https://github.com/rustdesk/rustdesk/tree/master/libs/hbb_common)**: 视频编解码, 配置, tcp/udp 封装, protobuf, 文件传输相关文件系统操作函数, 以及一些其他实用函数
-- **[libs/scrap](https://github.com/rustdesk/rustdesk/tree/master/libs/scrap)**: 屏幕截取
-- **[libs/enigo](https://github.com/rustdesk/rustdesk/tree/master/libs/enigo)**: 平台相关的鼠标键盘输入
-- **[libs/clipboard](https://github.com/rustdesk/rustdesk/tree/master/libs/clipboard)**: Windows、Linux、macOS 的文件复制和粘贴实现
-- **[src/ui](https://github.com/rustdesk/rustdesk/tree/master/src/ui)**: 过时的 Sciter UI（已弃用）
-- **[src/server](https://github.com/rustdesk/rustdesk/tree/master/src/server)**: 被控端服务音频、剪切板、输入、视频服务、网络连接的实现
-- **[src/client.rs](https://github.com/rustdesk/rustdesk/tree/master/src/client.rs)**: 控制端
-- **[src/rendezvous_mediator.rs](https://github.com/rustdesk/rustdesk/tree/master/src/rendezvous_mediator.rs)**: 与[rustdesk-server](https://github.com/rustdesk/rustdesk-server)保持UDP通讯, 等待远程连接（通过打洞直连或者中继）
-- **[src/platform](https://github.com/rustdesk/rustdesk/tree/master/src/platform)**: 平台服务相关代码
-- **[flutter](https://github.com/rustdesk/rustdesk/tree/master/flutter)**: 适用于桌面和移动设备的 Flutter 代码
-- **[flutter/web/js](https://github.com/rustdesk/rustdesk/tree/master/flutter/web/js)**: Flutter Web版本中的Javascript代码
+- **[libs/hbb_common](https://github.com/RustDesk/RustDesk/tree/master/libs/hbb_common)**: 视频编解码, 配置, tcp/udp 封装, protobuf, 文件传输相关文件系统操作函数, 以及一些其他实用函数
+- **[libs/scrap](https://github.com/RustDesk/RustDesk/tree/master/libs/scrap)**: 屏幕截取
+- **[libs/enigo](https://github.com/RustDesk/RustDesk/tree/master/libs/enigo)**: 平台相关的鼠标键盘输入
+- **[libs/clipboard](https://github.com/RustDesk/RustDesk/tree/master/libs/clipboard)**: Windows、Linux、macOS 的文件复制和粘贴实现
+- **[src/ui](https://github.com/RustDesk/RustDesk/tree/master/src/ui)**: 过时的 Sciter UI（已弃用）
+- **[src/server](https://github.com/RustDesk/RustDesk/tree/master/src/server)**: 被控端服务音频、剪切板、输入、视频服务、网络连接的实现
+- **[src/client.rs](https://github.com/RustDesk/RustDesk/tree/master/src/client.rs)**: 控制端
+- **[src/rendezvous_mediator.rs](https://github.com/RustDesk/RustDesk/tree/master/src/rendezvous_mediator.rs)**: 与[RustDesk-server](https://github.com/RustDesk/RustDesk-server)保持UDP通讯, 等待远程连接（通过打洞直连或者中继）
+- **[src/platform](https://github.com/RustDesk/RustDesk/tree/master/src/platform)**: 平台服务相关代码
+- **[flutter](https://github.com/RustDesk/RustDesk/tree/master/flutter)**: 适用于桌面和移动设备的 Flutter 代码
+- **[flutter/web/js](https://github.com/RustDesk/RustDesk/tree/master/flutter/web/js)**: Flutter Web版本中的Javascript代码
 
 ## 截图
 

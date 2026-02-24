@@ -24,7 +24,7 @@ const LOGIN_ACCOUNT_AUTH: &str = "Login account auth";
 #[derive(Deserialize, Clone, Debug)]
 pub struct OidcAuthUrl {
     code: String,
-    url: Url,
+    url: String,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default, Clone)]
@@ -37,7 +37,7 @@ pub struct DeviceInfo {
     #[serde(default)]
     pub r#type: String,
 
-    /// device name from rustdesk client,
+    /// device name from RustDesk client,
     /// browser info(name + version) from browser
     #[serde(default)]
     pub name: String,
@@ -343,7 +343,7 @@ impl OidcSession {
         AuthResult {
             state_msg: self.state_msg.to_string(),
             failed_msg: self.failed_msg.clone(),
-            url: self.code_url.as_ref().map(|x| x.url.to_string()),
+            url: self.code_url.as_ref().map(|x| x.url.clone()),
             auth_body: self.auth_body.clone(),
         }
     }

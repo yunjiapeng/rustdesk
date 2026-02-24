@@ -6,7 +6,7 @@ import '../models/platform_model.dart';
 import 'package:flutter_hbb/common.dart';
 export 'package:http/http.dart' show Response;
 
-enum HttpMethod { get, post, put, delete }
+enum HttpMethod { get, post, put, patch, delete }
 
 class HttpService {
   Future<http.Response> sendRequest(
@@ -15,6 +15,15 @@ class HttpService {
     Map<String, String>? headers,
     dynamic body,
   }) async {
+    // Patch: normalize relative URLs by prefixing with API base from Rust
+    if (!(url.hasScheme && (url.isScheme('http') || url.isScheme('https')))) {
+      final base = await bind.mainGetApiServer();
+      if (base.trim().isNotEmpty) {
+        final u = url.toString();
+        final normalized = u.startsWith('/') ? u : '/$u';
+        url = Uri.parse('$base$normalized');
+      }
+    }
     headers ??= {'Content-Type': 'application/json'};
 
     // Use Rust HTTP implementation for non-web platforms for consistency.
@@ -61,6 +70,9 @@ class HttpService {
         break;
       case HttpMethod.put:
         response = await http.put(url, headers: headers, body: body);
+        break;
+      case HttpMethod.patch:
+        response = await http.patch(url, headers: headers, body: body);
         break;
       case HttpMethod.delete:
         response = await http.delete(url, headers: headers, body: body);
@@ -117,6 +129,12 @@ Future<http.Response> put(Uri url,
     {Map<String, String>? headers, Object? body, Encoding? encoding}) async {
   return await HttpService()
       .sendRequest(url, HttpMethod.put, body: body, headers: headers);
+}
+
+Future<http.Response> patch(Uri url,
+    {Map<String, String>? headers, Object? body, Encoding? encoding}) async {
+  return await HttpService()
+      .sendRequest(url, HttpMethod.patch, body: body, headers: headers);
 }
 
 Future<http.Response> delete(Uri url,

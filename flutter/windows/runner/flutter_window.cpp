@@ -43,7 +43,7 @@ bool FlutterWindow::OnCreate() {
 
   flutter::MethodChannel<> channel(
     flutter_controller_->engine()->messenger(),
-    "org.rustdesk.rustdesk/host",
+    "org.RustDesk.RustDesk/host",
     &flutter::StandardMethodCodec::GetInstance());
 
   channel.SetMethodCallHandler(
@@ -86,6 +86,7 @@ bool FlutterWindow::OnCreate() {
     auto *flutter_view_controller =
         reinterpret_cast<flutter::FlutterViewController *>(controller);
     auto *registry = flutter_view_controller->engine();
+    RegisterPlugins(registry);
     TextureRgbaRendererPluginCApiRegisterWithRegistrar(
         registry->GetRegistrarForPlugin("TextureRgbaRendererPlugin"));
     FlutterGpuTextureRendererPluginCApiRegisterWithRegistrar(

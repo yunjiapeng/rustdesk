@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/common.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -10,14 +12,17 @@ import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 
 final testClients = [
-  Client(0, false, false, false, "UserAAAAAA", "123123123", true, false, false, false),
-  Client(1, false, false, false, "UserBBBBB", "221123123", true, false, false, false),
-  Client(2, false, false, false, "UserC", "331123123", true, false, false, false),
-  Client(3, false, false, false, "UserDDDDDDDDDDDd", "441123123", true, false, false, false)
+  Client(0, false, false, false, "UserAAAAAA", "123123123", true, false, false),
+  Client(1, false, false, false, "UserBBBBB", "221123123", true, false, false),
+  Client(2, false, false, false, "UserC", "331123123", true, false, false),
+  Client(3, false, false, false, "UserDDDDDDDDDDDd", "441123123", true, false, false)
 ];
 
 /// flutter run -d {platform} -t test/cm_test.dart to test cm
-void main(List<String> args) async {
+void main() async {
+  if (Platform.environment.containsKey('FLUTTER_TEST')) {
+    return;
+  }
   isTest = true;
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();

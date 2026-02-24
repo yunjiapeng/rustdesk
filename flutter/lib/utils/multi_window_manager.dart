@@ -527,7 +527,7 @@ class RustDeskMultiWindowManager {
   /// [Availability]
   /// This function should only be called from main window.
   /// For other windows, please post a unregister(hide) event to main window handler:
-  /// `rustDeskWinManager.call(WindowType.Main, kWindowEventHide, {"id": windowId!});`
+  /// `RustDeskWinManager.call(WindowType.Main, kWindowEventHide, {"id": windowId!});`
   Future<void> unregisterActiveWindow(int windowId) async {
     _activeWindows.remove(windowId);
     if (windowId != kMainWindowId) {
@@ -578,4 +578,4 @@ class RustDeskMultiWindowManager {
   }
 }
 
-final rustDeskWinManager = RustDeskMultiWindowManager.instance;
+final RustDeskWinManager = RustDeskMultiWindowManager.instance;

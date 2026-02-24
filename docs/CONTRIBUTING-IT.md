@@ -22,7 +22,7 @@ Questo per evitare duplicati sforzi dei contributori sullo stesso problema.
 
 - Le modifiche devono essere accompagnati da un certificato di origine per sviluppatori firmato (http://developercertificate.org), che indica che tu (e il tuo datore di lavoro se applicabile) accetti di essere vincolato dai termini della [licenza progetto](../LICENCE). In git, questa è l'opzione `-s` di `git commit`
 
-- Se la tua patch non viene esaminata o hai bisogno che una persona specifica la esamini, puoi @-rispondere ad un revisore chiedendo una revisione nella richiesta pull o un commento, oppure puoi chiedere una revisione tramite [email](mailto:info@rustdesk.com).
+- Se la tua patch non viene esaminata o hai bisogno che una persona specifica la esamini, puoi @-rispondere ad un revisore chiedendo una revisione nella richiesta pull o un commento, oppure puoi chiedere una revisione tramite [email](mailto:info@RustDesk.com).
 
 - Aggiungi test relativi al bug corretto o alla nuova funzionalità.
 
@@ -30,7 +30,7 @@ Per istruzioni specifiche su git, vedi [Workflow GitHub - 101](https://github.co
 
 ## Condotta
 
-https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT-IT.md
+https://github.com/RustDesk/RustDesk/blob/master/docs/CODE_OF_CONDUCT-IT.md
 
 ## Comunicazioni
 

@@ -13,30 +13,30 @@
 > **Descargo de responsabilidad por mal uso:** <br>
 > Los desarrolladores de RustDesk no aprueban ni apoyan ningún uso no ético o ilegal de este software. El mal uso, como el acceso no autorizado, el control o la invasión de la privacidad, va estrictamente en contra de nuestras directrices. Los autores no se hacen responsables de ningún uso indebido de la aplicación.
 
-Chatea con nosotros: [Discord](https://discord.gg/nDceKgxnkV) | [Twitter](https://twitter.com/rustdesk) | [Reddit](https://www.reddit.com/r/rustdesk) | [YouTube](https://www.youtube.com/@rustdesk)
+Chatea con nosotros: [Discord](https://discord.gg/nDceKgxnkV) | [Twitter](https://twitter.com/RustDesk) | [Reddit](https://www.reddit.com/r/RustDesk) | [YouTube](https://www.youtube.com/@RustDesk)
 
-[![RustDesk Server Pro](https://img.shields.io/badge/RustDesk%20Server%20Pro-Caracter%C3%ADsticas%20Avanzadas-blue)](https://rustdesk.com/pricing.html)
+[![RustDesk Server Pro](https://img.shields.io/badge/RustDesk%20Server%20Pro-Caracter%C3%ADsticas%20Avanzadas-blue)](https://RustDesk.com/pricing.html)
 
-Otro software de escritorio remoto, escrito en Rust. Funciona de forma inmediata, sin necesidad de configuración. Tienes el control total de tus datos, sin preocupaciones sobre la seguridad. Puedes utilizar nuestro servidor de rendezvous/relay, [instalar el tuyo](https://rustdesk.com/server), o [escribir tu propio servidor rendezvous/relay](https://github.com/rustdesk/rustdesk-server-demo).
+Otro software de escritorio remoto, escrito en Rust. Funciona de forma inmediata, sin necesidad de configuración. Tienes el control total de tus datos, sin preocupaciones sobre la seguridad. Puedes utilizar nuestro servidor de rendezvous/relay, [instalar el tuyo](https://RustDesk.com/server), o [escribir tu propio servidor rendezvous/relay](https://github.com/RustDesk/RustDesk-server-demo).
 
 ![image](https://user-images.githubusercontent.com/71636191/171661982-430285f0-2e12-4b1d-9957-4a58e375304d.png)
 
 RustDesk agradece la contribución de todo el mundo. Lee [`docs/CONTRIBUTING.md`](CONTRIBUTING.md) para ayuda para empezar.
 
-[**¿Cómo funciona rustdesk?**](https://github.com/rustdesk/rustdesk/wiki/How-does-RustDesk-work%3F)
+[**¿Cómo funciona RustDesk?**](https://github.com/RustDesk/RustDesk/wiki/How-does-RustDesk-work%3F)
 
-[**DESCARGA DE BINARIOS**](https://github.com/rustdesk/rustdesk/releases)
+[**DESCARGA DE BINARIOS**](https://github.com/RustDesk/RustDesk/releases)
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/en/packages/com.carriez.flutter_hbb)
 [<img src="https://flathub.org/api/badge?svg&locale=en"
     alt="Get it on Flathub"
-    height="80">](https://flathub.org/apps/com.rustdesk.RustDesk)
+    height="80">](https://flathub.org/apps/com.RustDesk.RustDesk)
 
 ## Dependencias
 
-Las versiones de escritorio utilizan Flutter o Sciter (obsoleto) para GUI, este tutorial es sólo para Sciter, ya que es más fácil y más amigable para empezar. Echa un vistazo a nuestro [CI](https://github.com/rustdesk/rustdesk/blob/master/.github/workflows/flutter-build.yml) para la construcción de la versión Flutter.
+Las versiones de escritorio utilizan Flutter o Sciter (obsoleto) para GUI, este tutorial es sólo para Sciter, ya que es más fácil y más amigable para empezar. Echa un vistazo a nuestro [CI](https://github.com/RustDesk/RustDesk/blob/master/.github/workflows/flutter-build.yml) para la construcción de la versión Flutter.
 
 Por favor descarga la librería dinámica de Sciter tú mismo.
 
@@ -113,8 +113,8 @@ cd
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source $HOME/.cargo/env
-git clone --recurse-submodules https://github.com/rustdesk/rustdesk
-cd rustdesk
+git clone --recurse-submodules https://github.com/RustDesk/RustDesk
+cd RustDesk
 mkdir -p target/debug
 wget https://raw.githubusercontent.com/c-smile/sciter-sdk/master/bin.lnx/x64/libsciter-gtk.so
 mv libsciter-gtk.so target/debug
@@ -126,44 +126,44 @@ VCPKG_ROOT=$HOME/vcpkg cargo run
 Empieza clonando el repositorio y compilando el contenedor de docker:
 
 ```sh
-git clone https://github.com/rustdesk/rustdesk
-cd rustdesk
+git clone https://github.com/RustDesk/RustDesk
+cd RustDesk
 git submodule update --init --recursive
-docker build -t "rustdesk-builder" .
+docker build -t "RustDesk-builder" .
 ```
 
 Entonces, cada vez que necesites compilar la aplicación, ejecuta el siguiente comando:
 
 ```sh
-docker run --rm -it -v $PWD:/home/user/rustdesk -v rustdesk-git-cache:/home/user/.cargo/git -v rustdesk-registry-cache:/home/user/.cargo/registry -e PUID="$(id -u)" -e PGID="$(id -g)" rustdesk-builder
+docker run --rm -it -v $PWD:/home/user/RustDesk -v RustDesk-git-cache:/home/user/.cargo/git -v RustDesk-registry-cache:/home/user/.cargo/registry -e PUID="$(id -u)" -e PGID="$(id -g)" RustDesk-builder
 ```
 
 Ten en cuenta que la primera compilación puede tardar más tiempo antes de que las dependencias se almacenen en la caché, las siguientes compilaciones serán más rápidas. Además, si necesitas especificar diferentes argumentos al comando de compilación, puedes hacerlo al final del comando en la posición `<OPTIONAL-ARGS>`. Por ejemplo, si deseas compilar una versión optimizada para publicación, deberas ejecutar el comando anterior seguido de `--release`. El ejecutable resultante estará disponible en la carpeta de destino en tu sistema, y puede ser ejecutado con:
 
 ```sh
-target/debug/rustdesk
+target/debug/RustDesk
 ```
 
 O si estas ejecutando una versión para su publicación:
 
 ```sh
-target/release/rustdesk
+target/release/RustDesk
 ```
 
 Por favor, asegurate de que estás ejecutando estos comandos desde la raíz del repositorio de RustDesk, de lo contrario la aplicación puede ser incapaz de encontrar los recursos necesarios. También ten en cuenta que otros subcomandos de cargo como `install` o `run` no estan actualmente soportados usando este metodo, ya que instalarían o ejecutarían el programa dentro del contenedor en lugar del host.
 
 ## Estructura de archivos
 
-- **[libs/hbb_common](https://github.com/rustdesk/rustdesk/tree/master/libs/hbb_common)**:  codec de video, configuración, tcp/udp wrapper, protobuf, funciones para transferencia de archivos, y otras funciones de utilidad.
-- **[libs/scrap](https://github.com/rustdesk/rustdesk/tree/master/libs/scrap)**: captura de pantalla
-- **[libs/enigo](https://github.com/rustdesk/rustdesk/tree/master/libs/enigo)**: control del teclado/mouse especificos de cada plataforma
-- **[src/ui](https://github.com/rustdesk/rustdesk/tree/master/src/ui)**: GUI
-- **[src/server](https://github.com/rustdesk/rustdesk/tree/master/src/server)**: sonido/portapapeles/input/servicios de video, y conexiones de red
-- **[src/client.rs](https://github.com/rustdesk/rustdesk/tree/master/src/client.rs)**: iniciar una conexión "peer to peer"
-- **[src/rendezvous_mediator.rs](https://github.com/rustdesk/rustdesk/tree/master/src/rendezvous_mediator.rs)**: Comunicación con [rustdesk-server](https://github.com/rustdesk/rustdesk-server), esperar la conexión remota directa ("TCP hole punching") o conexión indirecta ("relayed")
-- **[src/platform](https://github.com/rustdesk/rustdesk/tree/master/src/platform)**: código específico de cada plataforma
-- **[flutter](https://github.com/rustdesk/rustdesk/tree/master/flutter)**: Flutter, código para moviles
-- **[flutter/web/js](https://github.com/rustdesk/rustdesk/tree/master/flutter/web/js)**: Javascript para el cliente web Flutter
+- **[libs/hbb_common](https://github.com/RustDesk/RustDesk/tree/master/libs/hbb_common)**:  codec de video, configuración, tcp/udp wrapper, protobuf, funciones para transferencia de archivos, y otras funciones de utilidad.
+- **[libs/scrap](https://github.com/RustDesk/RustDesk/tree/master/libs/scrap)**: captura de pantalla
+- **[libs/enigo](https://github.com/RustDesk/RustDesk/tree/master/libs/enigo)**: control del teclado/mouse especificos de cada plataforma
+- **[src/ui](https://github.com/RustDesk/RustDesk/tree/master/src/ui)**: GUI
+- **[src/server](https://github.com/RustDesk/RustDesk/tree/master/src/server)**: sonido/portapapeles/input/servicios de video, y conexiones de red
+- **[src/client.rs](https://github.com/RustDesk/RustDesk/tree/master/src/client.rs)**: iniciar una conexión "peer to peer"
+- **[src/rendezvous_mediator.rs](https://github.com/RustDesk/RustDesk/tree/master/src/rendezvous_mediator.rs)**: Comunicación con [RustDesk-server](https://github.com/RustDesk/RustDesk-server), esperar la conexión remota directa ("TCP hole punching") o conexión indirecta ("relayed")
+- **[src/platform](https://github.com/RustDesk/RustDesk/tree/master/src/platform)**: código específico de cada plataforma
+- **[flutter](https://github.com/RustDesk/RustDesk/tree/master/flutter)**: Flutter, código para moviles
+- **[flutter/web/js](https://github.com/RustDesk/RustDesk/tree/master/flutter/web/js)**: Javascript para el cliente web Flutter
 
 > [!Precaución]
 > **Descargo de responsabilidad por uso indebido:** <br>
@@ -171,10 +171,10 @@ Por favor, asegurate de que estás ejecutando estos comandos desde la raíz del 
 
 ## Capturas de pantalla
 
-![Connection Manager](https://github.com/rustdesk/rustdesk/assets/28412477/db82d4e7-c4bc-4823-8e6f-6af7eadf7651)
+![Connection Manager](https://github.com/RustDesk/RustDesk/assets/28412477/db82d4e7-c4bc-4823-8e6f-6af7eadf7651)
 
-![Connected to a Windows PC](https://github.com/rustdesk/rustdesk/assets/28412477/9baa91e9-3362-4d06-aa1a-7518edcbd7ea)
+![Connected to a Windows PC](https://github.com/RustDesk/RustDesk/assets/28412477/9baa91e9-3362-4d06-aa1a-7518edcbd7ea)
 
-![File Transfer](https://github.com/rustdesk/rustdesk/assets/28412477/39511ad3-aa9a-4f8c-8947-1cce286a46ad)
+![File Transfer](https://github.com/RustDesk/RustDesk/assets/28412477/39511ad3-aa9a-4f8c-8947-1cce286a46ad)
 
-![TCP Tunneling](https://github.com/rustdesk/rustdesk/assets/28412477/78e8708f-e87e-4570-8373-1360033ea6c5)
+![TCP Tunneling](https://github.com/RustDesk/RustDesk/assets/28412477/78e8708f-e87e-4570-8373-1360033ea6c5)

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -132,6 +133,8 @@ class FfiModel with ChangeNotifier {
   bool isRefreshing = false;
 
   Timer? timerScreenshot;
+  Timer? _autoScreenshotTimer;
+  String? _pendingAutoScreenshotPath;
 
   Rect? get rect => _rect;
   bool get isOriginalResolutionSet =>
@@ -253,6 +256,35 @@ class FfiModel with ChangeNotifier {
     clearPermissions();
     waitForImageTimer?.cancel();
     timerScreenshot?.cancel();
+    _autoScreenshotTimer?.cancel();
+    _autoScreenshotTimer = null;
+    _pendingAutoScreenshotPath = null;
+  }
+
+  void scheduleAutoScreenshot(String peerId) {
+    _autoScreenshotTimer?.cancel();
+    _autoScreenshotTimer = Timer(const Duration(seconds: 5), () {
+      _autoScreenshotTimer = null;
+      final isSupported = bind.sessionGetCommonSync(
+              sessionId: sessionId, key: 'is_screenshot_supported', param: '') ==
+          'true';
+      if (!isSupported) {
+        return;
+      }
+      if (_pi.currentDisplay == kAllDisplayValue) {
+        return;
+      }
+      _pendingAutoScreenshotPath = _autoScreenshotPathForPeer(peerId);
+      bind.sessionTakeScreenshot(
+          sessionId: sessionId, display: _pi.currentDisplay);
+    });
+  }
+
+  String _autoScreenshotPathForPeer(String peerId) {
+    final safeId = peerId.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+    final normalized = safeId.isEmpty ? 'peer' : safeId;
+    final dir = File(Platform.resolvedExecutable).parent.path;
+    return '$dir${Platform.pathSeparator}$normalized.png';
   }
 
   setConnectionType(
@@ -487,6 +519,19 @@ class FfiModel with ChangeNotifier {
     timerScreenshot?.cancel();
     timerScreenshot = null;
     final msg = evt['msg'] ?? '';
+    if (_pendingAutoScreenshotPath != null && msg.isEmpty) {
+      final outputFile = _pendingAutoScreenshotPath!;
+      _pendingAutoScreenshotPath = null;
+      Future.delayed(Duration.zero, () async {
+        final res = await bind.sessionHandleScreenshot(
+            sessionId: sessionId, action: '0:$outputFile');
+        if (res.isNotEmpty) {
+          msgBox(sessionId, 'custom-nook-nocancel-hasclose-error',
+              'Take screenshot', res, '', parent.target!.dialogManager);
+        }
+      });
+      return;
+    }
     final msgBoxType = 'custom-nook-nocancel-hasclose';
     final msgBoxTitle = 'Take screenshot';
     final dialogManager = parent.target!.dialogManager;
@@ -753,7 +798,7 @@ class FfiModel with ChangeNotifier {
       case kUrlActionClose:
         debugPrint("closing all instances");
         Future.microtask(() async {
-          await rustDeskWinManager.closeAllSubWindows();
+          await RustDeskWinManager.closeAllSubWindows();
           windowManager.close();
         });
         break;
@@ -965,7 +1010,7 @@ class FfiModel with ChangeNotifier {
       // The actual wait may exceed 30s (e.g., 20s elapsed + 16s next retry = 36s), which is acceptable
       // since the controlled side reconnects quickly after account changes.
       // Uses time-based check instead of _reconnects count because user can manually retry.
-      // https://github.com/rustdesk/rustdesk/discussions/14048
+      // https://github.com/RustDesk/RustDesk/discussions/14048
       if (_offlineReconnectStartTime == null) {
         // First offline, record time and start retry
         _offlineReconnectStartTime = DateTime.now();
@@ -1724,7 +1769,7 @@ class FfiModel with ChangeNotifier {
 
   void setViewOnly(String id, bool value) {
     if (versionCmp(_pi.version, '1.2.0') < 0) return;
-    // tmp fix for https://github.com/rustdesk/rustdesk/pull/3706#issuecomment-1481242389
+    // tmp fix for https://github.com/RustDesk/RustDesk/pull/3706#issuecomment-1481242389
     // because below rx not used in mobile version, so not initialized, below code will cause crash
     // current our flutter code quality is fucking shit now. !!!!!!!!!!!!!!!!
     try {
@@ -2537,7 +2582,7 @@ class CanvasModel with ChangeNotifier {
       bumpAmount.y += bumpAmount.y.sign * 0.5;
 
       var bumpMouseSucceeded = _bumpMouseIsWorking &&
-          (await rustDeskWinManager.call(WindowType.Main, kWindowBumpMouse,
+          (await RustDeskWinManager.call(WindowType.Main, kWindowBumpMouse,
                   {"dx": bumpAmount.x.round(), "dy": bumpAmount.y.round()}))
               .result;
 
@@ -4019,7 +4064,7 @@ class PeerInfo with ChangeNotifier {
   bool get cursorEmbedded => tryGetDisplay()?.cursorEmbedded ?? false;
 
   bool get isRustDeskIdd =>
-      platformAdditions[kPlatformAdditionsIddImpl] == 'rustdesk_idd';
+      platformAdditions[kPlatformAdditionsIddImpl] == 'RustDesk_idd';
   bool get isAmyuniIdd =>
       platformAdditions[kPlatformAdditionsIddImpl] == 'amyuni_idd';
 

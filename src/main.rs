@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-use librustdesk::*;
+use libRustDesk::*;
 
 #[cfg(any(target_os = "android", target_os = "ios", feature = "flutter"))]
 fn main() {
@@ -46,9 +46,9 @@ fn main() {
         -k, --key=[KEY] ''
        -s, --server=[] 'Start server'",
     );
-    let matches = App::new("rustdesk")
+    let matches = App::new("RustDesk")
         .version(crate::VERSION)
-        .author("Purslane Ltd<info@rustdesk.com>")
+        .author("Purslane Ltd<info@RustDesk.com>")
         .about("RustDesk command line tool")
         .args_from_usage(&args)
         .get_matches();

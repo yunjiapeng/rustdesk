@@ -1,10 +1,10 @@
-Name:       rustdesk
+Name:       RustDesk
 Version:    1.4.5
 Release:    0
 Summary:    RPM package
 License:    GPL-3.0
-URL:        https://rustdesk.com
-Vendor:     rustdesk <info@rustdesk.com>
+URL:        https://RustDesk.com
+Vendor:     RustDesk <info@RustDesk.com>
 Requires:   gtk3 libxcb libXfixes alsa-lib libva2 pam gstreamer1-plugins-base
 Recommends: libayatana-appindicator-gtk3 libxdo
 
@@ -23,27 +23,27 @@ The best open-source remote desktop client software, written in Rust.
 
 %install
 mkdir -p %{buildroot}/usr/bin/
-mkdir -p %{buildroot}/usr/share/rustdesk/
-mkdir -p %{buildroot}/usr/share/rustdesk/files/
+mkdir -p %{buildroot}/usr/share/RustDesk/
+mkdir -p %{buildroot}/usr/share/RustDesk/files/
 mkdir -p %{buildroot}/usr/share/icons/hicolor/256x256/apps/
 mkdir -p %{buildroot}/usr/share/icons/hicolor/scalable/apps/
-install -m 755 $HBB/target/release/rustdesk %{buildroot}/usr/bin/rustdesk
-install $HBB/libsciter-gtk.so %{buildroot}/usr/share/rustdesk/libsciter-gtk.so
-install $HBB/res/rustdesk.service %{buildroot}/usr/share/rustdesk/files/
-install $HBB/res/128x128@2x.png %{buildroot}/usr/share/icons/hicolor/256x256/apps/rustdesk.png
-install $HBB/res/scalable.svg %{buildroot}/usr/share/icons/hicolor/scalable/apps/rustdesk.svg
-install $HBB/res/rustdesk.desktop %{buildroot}/usr/share/rustdesk/files/
-install $HBB/res/rustdesk-link.desktop %{buildroot}/usr/share/rustdesk/files/
+install -m 755 $HBB/target/release/RustDesk %{buildroot}/usr/bin/RustDesk
+install $HBB/libsciter-gtk.so %{buildroot}/usr/share/RustDesk/libsciter-gtk.so
+install $HBB/res/RustDesk.service %{buildroot}/usr/share/RustDesk/files/
+install $HBB/res/128x128@2x.png %{buildroot}/usr/share/icons/hicolor/256x256/apps/RustDesk.png
+install $HBB/res/scalable.svg %{buildroot}/usr/share/icons/hicolor/scalable/apps/RustDesk.svg
+install $HBB/res/RustDesk.desktop %{buildroot}/usr/share/RustDesk/files/
+install $HBB/res/RustDesk-link.desktop %{buildroot}/usr/share/RustDesk/files/
 
 %files
-/usr/bin/rustdesk
-/usr/share/rustdesk/libsciter-gtk.so
-/usr/share/rustdesk/files/rustdesk.service
-/usr/share/icons/hicolor/256x256/apps/rustdesk.png
-/usr/share/icons/hicolor/scalable/apps/rustdesk.svg
-/usr/share/rustdesk/files/rustdesk.desktop
-/usr/share/rustdesk/files/rustdesk-link.desktop
-/usr/share/rustdesk/files/__pycache__/*
+/usr/bin/RustDesk
+/usr/share/RustDesk/libsciter-gtk.so
+/usr/share/RustDesk/files/RustDesk.service
+/usr/share/icons/hicolor/256x256/apps/RustDesk.png
+/usr/share/icons/hicolor/scalable/apps/RustDesk.svg
+/usr/share/RustDesk/files/RustDesk.desktop
+/usr/share/RustDesk/files/RustDesk-link.desktop
+/usr/share/RustDesk/files/__pycache__/*
 
 %changelog
 # let's skip this for now
@@ -56,26 +56,26 @@ case "$1" in
   ;;
   2)
     # for upgrade
-    systemctl stop rustdesk || true
+    systemctl stop RustDesk || true
   ;;
 esac
 
 %post
-cp /usr/share/rustdesk/files/rustdesk.service /etc/systemd/system/rustdesk.service
-cp /usr/share/rustdesk/files/rustdesk.desktop /usr/share/applications/
-cp /usr/share/rustdesk/files/rustdesk-link.desktop /usr/share/applications/
+cp /usr/share/RustDesk/files/RustDesk.service /etc/systemd/system/RustDesk.service
+cp /usr/share/RustDesk/files/RustDesk.desktop /usr/share/applications/
+cp /usr/share/RustDesk/files/RustDesk-link.desktop /usr/share/applications/
 systemctl daemon-reload
-systemctl enable rustdesk
-systemctl start rustdesk
+systemctl enable RustDesk
+systemctl start RustDesk
 update-desktop-database
 
 %preun
 case "$1" in
   0)
     # for uninstall
-    systemctl stop rustdesk || true
-    systemctl disable rustdesk || true
-    rm /etc/systemd/system/rustdesk.service || true
+    systemctl stop RustDesk || true
+    systemctl disable RustDesk || true
+    rm /etc/systemd/system/RustDesk.service || true
   ;;
   1)
     # for upgrade
@@ -86,8 +86,8 @@ esac
 case "$1" in
   0)
     # for uninstall
-    rm /usr/share/applications/rustdesk.desktop || true
-    rm /usr/share/applications/rustdesk-link.desktop || true
+    rm /usr/share/applications/RustDesk.desktop || true
+    rm /usr/share/applications/RustDesk-link.desktop || true
     update-desktop-database
   ;;
   1)

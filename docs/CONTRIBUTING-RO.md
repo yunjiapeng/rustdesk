@@ -16,7 +16,7 @@ Dacă dorești să lucrezi la o problemă, te rugăm să o revendici mai întâi
 
 - Commit-urile trebuie să fie însoțite de un semnătura Developer Certificate of Origin (http://developercertificate.org), care indică faptul că tu (și angajatorul tău, dacă este cazul) ești de acord să respecți termenii [licenței proiectului](../LICENCE). În git, aceasta este opțiunea `-s` la `git commit`.
 
-- Dacă patch-ul tău nu este revizuit sau ai nevoie ca o anumită persoană să-l revizuiască, poți @-reply unui reviewer cerând o revizuire în pull request sau într-un comentariu, sau poți solicita o revizuire prin [email](mailto:info@rustdesk.com).
+- Dacă patch-ul tău nu este revizuit sau ai nevoie ca o anumită persoană să-l revizuiască, poți @-reply unui reviewer cerând o revizuire în pull request sau într-un comentariu, sau poți solicita o revizuire prin [email](mailto:info@RustDesk.com).
 
 - Adaugă teste relevante pentru bug-ul corectat sau pentru funcționalitatea nouă.
 
@@ -24,7 +24,7 @@ Pentru instrucțiuni specifice git, vezi [GitHub workflow 101](https://github.co
 
 ## Conduită
 
-[Codul de Conduită RustDesk](https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT.md)
+[Codul de Conduită RustDesk](https://github.com/RustDesk/RustDesk/blob/master/docs/CODE_OF_CONDUCT.md)
 
 ## Comunicare
 

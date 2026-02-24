@@ -159,6 +159,13 @@ void runMainApp(bool startService) async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     // Restore the location of the main window before window hide or show.
     await restoreWindowPosition(WindowType.Main);
+    if (isDesktop) {
+      final fixedSize = Size(
+          kDesktopDefaultDisplayWidth.toDouble(),
+          kDesktopDefaultDisplayHeight * 0.9);
+      await windowManager.setSize(fixedSize);
+      setResizable(false);
+    }
     // Check the startup argument, if we successfully handle the argument, we keep the main window hidden.
     final handledByUniLinks = await initUniLinks();
     debugPrint("handled by uni links: $handledByUniLinks");
@@ -168,12 +175,14 @@ void runMainApp(bool startService) async {
       windowManager.show();
       windowManager.focus();
       // Move registration of active main window here to prevent from async visible check.
-      rustDeskWinManager.registerActiveWindow(kWindowMainId);
+      RustDeskWinManager.registerActiveWindow(kWindowMainId);
     }
     windowManager.setOpacity(1);
     windowManager.setTitle(getWindowName());
     // Do not use `windowManager.setResizable()` here.
-    setResizable(!bind.isIncomingOnly());
+    if (!isDesktop) {
+      setResizable(!bind.isIncomingOnly());
+    }
   });
 }
 

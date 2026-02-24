@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.rustdesk.RustDesk</id>
-  <developer id="com.rustdesk">
+  <id>com.RustDesk.RustDesk</id>
+  <developer id="com.RustDesk">
     <name>RustDesk</name>
   </developer>
-  <launchable type="desktop-id">com.rustdesk.RustDesk.desktop</launchable>
+  <launchable type="desktop-id">com.RustDesk.RustDesk.desktop</launchable>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>AGPL-3.0-only</project_license>
   <name>RustDesk</name>
@@ -38,15 +38,15 @@
     <color type="primary" scheme_preference="light">#d9eaf8</color>
     <color type="primary" scheme_preference="dark">#0160ee</color>
   </branding>
-  <url type="homepage">https://rustdesk.com</url>
-  <url type="bugtracker">https://github.com/rustdesk/rustdesk/issues</url>
-  <url type="faq">https://github.com/rustdesk/rustdesk/wiki/FAQ</url>
-  <url type="help">https://rustdesk.com/docs</url>
-  <url type="donation">https://ko-fi.com/rustdesk</url>
-  <url type="vcs-browser">https://github.com/rustdesk/rustdesk</url>
-  <url type="translate">https://github.com/rustdesk/rustdesk/tree/master/src/lang</url>
-  <url type="contribute">https://github.com/rustdesk/rustdesk/blob/master/docs/CONTRIBUTING.md</url>
-  <url type="contact">https://rustdesk.com/docs/en/technical-support</url>
+  <url type="homepage">https://RustDesk.com</url>
+  <url type="bugtracker">https://github.com/RustDesk/RustDesk/issues</url>
+  <url type="faq">https://github.com/RustDesk/RustDesk/wiki/FAQ</url>
+  <url type="help">https://RustDesk.com/docs</url>
+  <url type="donation">https://ko-fi.com/RustDesk</url>
+  <url type="vcs-browser">https://github.com/RustDesk/RustDesk</url>
+  <url type="translate">https://github.com/RustDesk/RustDesk/tree/master/src/lang</url>
+  <url type="contribute">https://github.com/RustDesk/RustDesk/blob/master/docs/CONTRIBUTING.md</url>
+  <url type="contact">https://RustDesk.com/docs/en/technical-support</url>
   <requires>
     <display_length compare="ge">600</display_length>
     <internet>always</internet>

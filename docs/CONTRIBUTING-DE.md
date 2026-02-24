@@ -34,7 +34,7 @@ werden, dass Beiträge zum gleichen Thema doppelt bearbeitet werden.
 - Wenn Ihr Patch nicht begutachtet wird oder Sie eine bestimmte Person zur
   Begutachtung benötigen, können Sie einem Gutachter mit @ antworten und um eine
   Begutachtung des Pull Requests oder einen Kommentar bitten. Sie können auch
-  per [E-Mail](mailto:info@rustdesk.com) um eine Begutachtung bitten.
+  per [E-Mail](mailto:info@RustDesk.com) um eine Begutachtung bitten.
 
 - Fügen Sie Tests hinzu, die sich auf den behobenen Fehler oder die neue
   Funktion beziehen.
@@ -43,7 +43,7 @@ Spezifische Git-Anweisungen finden Sie im [GitHub-Workflow](https://github.com/s
 
 ## Verhalten
 
-https://github.com/rustdesk/rustdesk/blob/master/docs/CODE_OF_CONDUCT.md
+https://github.com/RustDesk/RustDesk/blob/master/docs/CODE_OF_CONDUCT.md
 
 ## Kommunikation
 

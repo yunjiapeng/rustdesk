@@ -1,5 +1,5 @@
 [package]
-name = "rustdesk-portable-packer"
+name = "RustDesk-portable-packer"
 version = "1.4.5"
 edition = "2021"
 description = "RustDesk Remote Desktop"
@@ -28,7 +28,7 @@ native-windows-gui = {version = "1.0", default-features = false, features = ["an
 [package.metadata.winres]
 LegalCopyright = "Copyright © 2025 Purslane Ltd. All rights reserved."
 ProductName = "RustDesk"
-OriginalFilename = "rustdesk.exe"
+OriginalFilename = "RustDesk.exe"
 FileDescription = "RustDesk Remote Desktop"
 #ProductVersion = ""
 

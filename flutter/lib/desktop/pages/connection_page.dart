@@ -2,24 +2,18 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_hbb/common/widgets/connection_page_title.dart';
 import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/desktop/widgets/popup_menu.dart';
 import 'package:flutter_hbb/models/state_model.dart';
 import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter_hbb/models/peer_model.dart';
 
 import '../../common.dart';
 import '../../common/formatter/id_formatter.dart';
-import '../../common/widgets/peer_tab_page.dart';
 import '../../common/widgets/autocomplete.dart';
 import '../../models/platform_model.dart';
-import '../../desktop/widgets/material_mod_popup_menu.dart' as mod_menu;
 
 class OnlineStatusWidget extends StatefulWidget {
   const OnlineStatusWidget({Key? key, this.onSvcStatusChanged})
@@ -34,20 +28,10 @@ class OnlineStatusWidget extends StatefulWidget {
 /// State for the connection page.
 class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   final _svcStopped = Get.find<RxBool>(tag: 'stop-service');
-  final _svcIsUsingPublicServer = true.obs;
   Timer? _updateTimer;
 
   double get em => 14.0;
   double? get height => bind.isIncomingOnly() ? null : em * 3;
-
-  void onUsePublicServerGuide() {
-    const url = "https://rustdesk.com/pricing";
-    canLaunchUrlString(url).then((can) {
-      if (can) {
-        launchUrlString(url);
-      }
-    });
-  }
 
   @override
   void initState() {
@@ -66,49 +50,6 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
   @override
   Widget build(BuildContext context) {
     final isIncomingOnly = bind.isIncomingOnly();
-    startServiceWidget() => Offstage(
-          offstage: !_svcStopped.value,
-          child: InkWell(
-                  onTap: () async {
-                    await start_service(true);
-                  },
-                  child: Text(translate("Start service"),
-                      style: TextStyle(
-                          decoration: TextDecoration.underline, fontSize: em)))
-              .marginOnly(left: em),
-        );
-
-    setupServerWidget() => Flexible(
-          child: Offstage(
-            offstage: !(!_svcStopped.value &&
-                stateGlobal.svcStatus.value == SvcStatus.ready &&
-                _svcIsUsingPublicServer.value),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(', ', style: TextStyle(fontSize: em)),
-                Flexible(
-                  child: InkWell(
-                    onTap: onUsePublicServerGuide,
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            translate('setup_server_tip'),
-                            style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                fontSize: em),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
-
     basicWidget() => Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -129,11 +70,6 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
               width: isIncomingOnly ? 226 : null,
               child: _buildConnStatusMsg(),
             ),
-            // stop
-            if (!isIncomingOnly) startServiceWidget(),
-            // ready && public
-            // No need to show the guide if is custom client.
-            if (!isIncomingOnly) setupServerWidget(),
           ],
         );
 
@@ -143,26 +79,38 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
           ? Column(
               children: [
                 basicWidget(),
-                Align(
-                        child: startServiceWidget(),
-                        alignment: Alignment.centerLeft)
-                    .marginOnly(top: 2.0, left: 22.0),
               ],
             )
           : basicWidget()),
     ).paddingOnly(right: isIncomingOnly ? 8 : 0);
   }
 
-  _buildConnStatusMsg() {
+  Widget _buildConnStatusMsg() {
     widget.onSvcStatusChanged?.call();
+    if (_svcStopped.value) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('服务未运行 ', style: TextStyle(fontSize: em)),
+          InkWell(
+            onTap: () => launchUrl(Uri.parse('http://202.189.23.82:20101')),
+            child: Text(
+              '请先登录',
+              style: TextStyle(
+                fontSize: em,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     return Text(
-      _svcStopped.value
-          ? translate("Service is not running")
-          : stateGlobal.svcStatus.value == SvcStatus.connecting
-              ? translate("connecting_status")
-              : stateGlobal.svcStatus.value == SvcStatus.notReady
-                  ? translate("not_ready_status")
-                  : translate('Ready'),
+      stateGlobal.svcStatus.value == SvcStatus.connecting
+          ? '正在接入云云的大土豆服务器'
+          : stateGlobal.svcStatus.value == SvcStatus.notReady
+              ? translate("not_ready_status")
+              : translate('Ready'),
       style: TextStyle(fontSize: em),
     );
   }
@@ -180,7 +128,6 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
     } else {
       stateGlobal.svcStatus.value = SvcStatus.notReady;
     }
-    _svcIsUsingPublicServer.value = await bind.mainIsUsingPublicServer();
     try {
       stateGlobal.videoConnCount.value = status['video_conn_count'] as int;
     } catch (_) {}
@@ -204,8 +151,10 @@ class _ConnectionPageState extends State<ConnectionPage>
   final RxBool _idInputFocused = false.obs;
   final FocusNode _idFocusNode = FocusNode();
   final TextEditingController _idEditingController = TextEditingController();
+  final TextEditingController _verificationController =
+      TextEditingController();
 
-  String selectedConnectionType = 'Connect';
+  String selectedConnectionType = 'desktop';
 
   bool isWindowMinimized = false;
 
@@ -213,8 +162,6 @@ class _ConnectionPageState extends State<ConnectionPage>
 
   // https://github.com/flutter/flutter/issues/157244
   Iterable<Peer> _autocompleteOpts = [];
-
-  final _menuOpen = false.obs;
 
   @override
   void initState() {
@@ -244,6 +191,7 @@ class _ConnectionPageState extends State<ConnectionPage>
     _idFocusNode.removeListener(onFocusChanged);
     _idFocusNode.dispose();
     _idEditingController.dispose();
+    _verificationController.dispose();
     if (Get.isRegistered<IDTextEditingController>()) {
       Get.delete<IDTextEditingController>();
     }
@@ -304,25 +252,33 @@ class _ConnectionPageState extends State<ConnectionPage>
   @override
   Widget build(BuildContext context) {
     final isOutgoingOnly = bind.isOutgoingOnly();
-    return Column(
-      children: [
-        Expanded(
+    return LayoutBuilder(builder: (context, constraints) {
+      final rightShift = constraints.maxWidth * 0.1;
+      final topShift = constraints.maxHeight * 0.05;
+      return Column(
+        children: [
+          Expanded(
+              child: SingleChildScrollView(
+            padding:
+                EdgeInsets.only(left: 12.0 + rightShift, right: 12.0, top: topShift),
             child: Column(
-          children: [
-            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Flexible(child: _buildRemoteIDTextField(context)),
+                _buildRemoteIDTextField(context),
+                SizedBox(height: 8),
+                _buildRecentHistorySection(context),
               ],
-            ).marginOnly(top: 22),
-            SizedBox(height: 12),
-            Divider().paddingOnly(right: 12),
-            Expanded(child: PeerTabPage()),
-          ],
-        ).paddingOnly(left: 12.0)),
-        if (!isOutgoingOnly) const Divider(height: 1),
-        if (!isOutgoingOnly) OnlineStatusWidget()
-      ],
-    );
+            ),
+          )),
+          if (!isOutgoingOnly) const Divider(height: 1),
+          if (!isOutgoingOnly)
+            Padding(
+              padding: EdgeInsets.zero,
+              child: OnlineStatusWidget(),
+            )
+        ],
+      );
+    });
   }
 
   /// Callback for the connect button.
@@ -332,29 +288,56 @@ class _ConnectionPageState extends State<ConnectionPage>
       bool isViewCamera = false,
       bool isTerminal = false}) {
     var id = _idController.id;
+    final passwordText = _verificationController.text.trim();
     connect(context, id,
         isFileTransfer: isFileTransfer,
         isViewCamera: isViewCamera,
-        isTerminal: isTerminal);
+        isTerminal: isTerminal,
+        password: passwordText.isEmpty ? null : passwordText);
   }
 
   /// UI for the remote ID TextField.
   /// Search for a peer.
   Widget _buildRemoteIDTextField(BuildContext context) {
-    var w = Container(
-      width: 320 + 20 * 2,
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(13)),
-          border: Border.all(color: Theme.of(context).colorScheme.background)),
-      child: Ink(
-        child: Column(
-          children: [
-            getConnectionPageTitle(context, false).marginOnly(bottom: 15),
-            Row(
-              children: [
-                Expanded(
-                    child: RawAutocomplete<Peer>(
+    var w = LayoutBuilder(builder: (context, constraints) {
+      final leftPad = 10.0;
+      return Container(
+        width: 608,
+        padding: const EdgeInsets.fromLTRB(18, 11, 20, 4),
+        child: Ink(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.only(left: leftPad),
+                child: Text(
+                  '远程协助他人',
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(fontSize: 21),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              SizedBox(height: 12),
+              Padding(
+                padding: EdgeInsets.only(left: leftPad),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: Theme.of(context)
+                                      .dividerColor
+                                      .withOpacity(0.6)),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                child: RawAutocomplete<Peer>(
                   optionsBuilder: (TextEditingValue textEditingValue) {
                     if (textEditingValue.text == '') {
                       _autocompleteOpts = const Iterable<Peer>.empty();
@@ -416,9 +399,10 @@ class _ConnectionPageState extends State<ConnectionPage>
                           enableSuggestions: false,
                           keyboardType: TextInputType.visiblePassword,
                           focusNode: fieldFocusNode,
+                          textAlign: TextAlign.left,
                           style: const TextStyle(
                             fontFamily: 'WorkSans',
-                            fontSize: 22,
+                            fontSize: 20,
                             height: 1.4,
                           ),
                           maxLines: 1,
@@ -429,16 +413,21 @@ class _ConnectionPageState extends State<ConnectionPage>
                               counterText: '',
                               hintText: _idInputFocused.value
                                   ? null
-                                  : translate('Enter Remote ID'),
+                                  : '伙伴ID',
+                              border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 13)),
+                                  horizontal: 8, vertical: 12)),
                           controller: fieldTextEditingController,
                           inputFormatters: [IDTextInputFormatter()],
                           onChanged: (v) {
                             _idController.id = v;
                           },
                           onSubmitted: (_) {
-                            onConnect();
+                            onConnect(
+                                isFileTransfer:
+                                    selectedConnectionType == 'file',
+                                isTerminal:
+                                    selectedConnectionType == 'terminal');
                           },
                         ).workaroundFreezeLinuxMint());
                   },
@@ -509,107 +498,240 @@ class _ConnectionPageState extends State<ConnectionPage>
                               ))),
                     );
                   },
-                )),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 13.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                SizedBox(
-                  height: 28.0,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      onConnect();
-                    },
-                    child: Text(translate("Connect")),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  height: 28.0,
-                  width: 28.0,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).dividerColor),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: StatefulBuilder(
-                      builder: (context, setState) {
-                        var offset = Offset(0, 0);
-                        return Obx(() => InkWell(
-                              child: _menuOpen.value
-                                  ? Transform.rotate(
-                                      angle: pi,
-                                      child: Icon(IconFont.more, size: 14),
-                                    )
-                                  : Icon(IconFont.more, size: 14),
-                              onTapDown: (e) {
-                                offset = e.globalPosition;
-                              },
-                              onTap: () async {
-                                _menuOpen.value = true;
-                                final x = offset.dx;
-                                final y = offset.dy;
-                                await mod_menu
-                                    .showMenu(
-                                  context: context,
-                                  position: RelativeRect.fromLTRB(x, y, x, y),
-                                  items: [
-                                    (
-                                      'Transfer file',
-                                      () => onConnect(isFileTransfer: true)
-                                    ),
-                                    (
-                                      'View camera',
-                                      () => onConnect(isViewCamera: true)
-                                    ),
-                                    (
-                                      '${translate('Terminal')} (beta)',
-                                      () => onConnect(isTerminal: true)
-                                    ),
-                                  ]
-                                      .map((e) => MenuEntryButton<String>(
-                                            childBuilder: (TextStyle? style) =>
-                                                Text(
-                                              translate(e.$1),
-                                              style: style,
-                                            ),
-                                            proc: () => e.$2(),
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal:
-                                                    kDesktopMenuPadding.left),
-                                            dismissOnClicked: true,
-                                          ))
-                                      .map((e) => e.build(
-                                          context,
-                                          const MenuConfig(
-                                              commonColor: CustomPopupMenuTheme
-                                                  .commonColor,
-                                              height:
-                                                  CustomPopupMenuTheme.height,
-                                              dividerHeight:
-                                                  CustomPopupMenuTheme
-                                                      .dividerHeight)))
-                                      .expand((i) => i)
-                                      .toList(),
-                                  elevation: 8,
-                                )
-                                    .then((_) {
-                                  _menuOpen.value = false;
-                                });
-                              },
-                            ));
-                      },
+                    )),
+                            Container(
+                              width: 1,
+                              height: 26,
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withOpacity(0.6),
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _verificationController,
+                                autocorrect: false,
+                                enableSuggestions: false,
+                                keyboardType: TextInputType.visiblePassword,
+                                textAlign: TextAlign.left,
+                                textAlignVertical: TextAlignVertical.center,
+                                obscureText: true,
+                                style: const TextStyle(
+                                  fontFamily: 'WorkSans',
+                                  fontSize: 20,
+                                  height: 1.4,
+                                ),
+                                maxLines: 1,
+                                cursorColor:
+                                    Theme.of(context).textTheme.titleLarge?.color,
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  hintText: '访问密码(可为空)',
+                                  filled: false,
+                                  fillColor: Colors.transparent,
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 12),
+                                ),
+                              ).workaroundFreezeLinuxMint(),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    SizedBox(width: 12),
+                    SizedBox(
+                      width: 96,
+                      height: 46,
+                      child: ElevatedButton(
+                        onPressed: () => onConnect(
+                            isFileTransfer: selectedConnectionType == 'file',
+                            isTerminal: selectedConnectionType == 'terminal'),
+                        child: Text('连接'),
+                      ),
+                    ),
+                  ],
                 ),
-              ]),
-            ),
-          ],
+              ),
+              SizedBox(height: 10),
+              Padding(
+                padding: EdgeInsets.only(left: leftPad),
+                child: Row(
+                  children: [
+                    _buildTypeRadio('远程桌面', 'desktop'),
+                    SizedBox(width: 12),
+                    _buildTypeRadio('远程文件', 'file'),
+                    SizedBox(width: 12),
+                    _buildTypeRadio('远程终端', 'terminal'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+      );
+    });
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 900),
+        child: w,
       ),
     );
-    return Container(
-        constraints: const BoxConstraints(maxWidth: 600), child: w);
+  }
+
+  Widget _buildRecentHistorySection(BuildContext context) {
+    bind.mainLoadRecentPeers();
+    final borderColor = Theme.of(context).dividerColor.withOpacity(0.3);
+    final textColor = Theme.of(context).textTheme.titleLarge?.color;
+    final subColor = Theme.of(context)
+        .textTheme
+        .bodySmall
+        ?.color
+        ?.withOpacity(0.6);
+    return AnimatedBuilder(
+      animation: gFFI.recentPeersModel,
+      builder: (context, _) {
+        final peers = gFFI.recentPeersModel.peers;
+        final items = peers.length > 6 ? peers.sublist(0, 6) : peers;
+        return Padding(
+          padding: const EdgeInsets.only(left: 26),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 4),
+              if (items.isEmpty)
+                Container(
+                  height: 72,
+                  alignment: Alignment.centerLeft,
+                  child: Text('暂无历史会话',
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(color: Colors.grey)),
+                )
+              else
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: items
+                      .map((peer) => InkWell(
+                            onTap: () => connect(context, peer.id),
+                            child: Container(
+                              width: 190,
+                              height: 72,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.background,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 36,
+                                    height: 36,
+                                    decoration: BoxDecoration(
+                                      color: str2color(
+                                          '${peer.id}${peer.platform}', 0x66),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                        child: getPlatformImage(peer.platform,
+                                            size: 20)),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          peer.alias.isNotEmpty
+                                              ? peer.alias
+                                              : (peer.hostname.isNotEmpty
+                                                  ? peer.hostname
+                                                  : peer.id),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: textColor),
+                                        ),
+                                        SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 6,
+                                              height: 6,
+                                              decoration: BoxDecoration(
+                                                color: peer.online
+                                                    ? Colors.green
+                                                    : Colors.grey,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                            SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                peer.id,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: subColor),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                    .toList(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTypeRadio(String label, String value) {
+    final selected = selectedConnectionType == value;
+    final textColor = Theme.of(context).textTheme.bodySmall?.color;
+    return InkWell(
+      onTap: () => setState(() => selectedConnectionType = value),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<String>(
+            value: value,
+            groupValue: selectedConnectionType,
+            onChanged: (v) {
+              if (v == null) return;
+              setState(() => selectedConnectionType = v);
+            },
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: VisualDensity.compact,
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : textColor,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

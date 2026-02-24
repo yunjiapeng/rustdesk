@@ -22,7 +22,6 @@ import 'package:flutter_hbb/plugin/widgets/desktop_settings.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../common/widgets/dialog.dart';
 import '../../common/widgets/login.dart';
@@ -53,12 +52,9 @@ class _TabInfo {
 enum SettingsTabKey {
   general,
   safety,
-  network,
   display,
   plugin,
-  account,
   printer,
-  about,
 }
 
 class DesktopSettingPage extends StatefulWidget {
@@ -70,17 +66,12 @@ class DesktopSettingPage extends StatefulWidget {
         !bind.isDisableSettings() &&
         bind.mainGetBuildinOption(key: kOptionHideSecuritySetting) != 'Y')
       SettingsTabKey.safety,
-    if (!bind.isDisableSettings() &&
-        bind.mainGetBuildinOption(key: kOptionHideNetworkSetting) != 'Y')
-      SettingsTabKey.network,
     if (!bind.isIncomingOnly()) SettingsTabKey.display,
     if (!isWeb && !bind.isIncomingOnly() && bind.pluginFeatureIsEnabled())
       SettingsTabKey.plugin,
-    if (!bind.isDisableAccount()) SettingsTabKey.account,
     if (isWindows &&
         bind.mainGetBuildinOption(key: kOptionHideRemotePrinterSetting) != 'Y')
       SettingsTabKey.printer,
-    SettingsTabKey.about,
   ];
 
   DesktopSettingPage({Key? key, required this.initialTabkey}) : super(key: key);
@@ -188,10 +179,6 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           settingTabs.add(_TabInfo(tab, 'Security',
               Icons.enhanced_encryption_outlined, Icons.enhanced_encryption));
           break;
-        case SettingsTabKey.network:
-          settingTabs
-              .add(_TabInfo(tab, 'Network', Icons.link_outlined, Icons.link));
-          break;
         case SettingsTabKey.display:
           settingTabs.add(_TabInfo(tab, 'Display',
               Icons.desktop_windows_outlined, Icons.desktop_windows));
@@ -200,17 +187,9 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
           settingTabs.add(_TabInfo(
               tab, 'Plugin', Icons.extension_outlined, Icons.extension));
           break;
-        case SettingsTabKey.account:
-          settingTabs.add(
-              _TabInfo(tab, 'Account', Icons.person_outline, Icons.person));
-          break;
         case SettingsTabKey.printer:
           settingTabs
               .add(_TabInfo(tab, 'Printer', Icons.print_outlined, Icons.print));
-          break;
-        case SettingsTabKey.about:
-          settingTabs
-              .add(_TabInfo(tab, 'About', Icons.info_outline, Icons.info));
           break;
       }
     }
@@ -227,23 +206,14 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
         case SettingsTabKey.safety:
           children.add(const _Safety());
           break;
-        case SettingsTabKey.network:
-          children.add(const _Network());
-          break;
         case SettingsTabKey.display:
           children.add(const _Display());
           break;
         case SettingsTabKey.plugin:
           children.add(const _Plugin());
           break;
-        case SettingsTabKey.account:
-          children.add(const _Account());
-          break;
         case SettingsTabKey.printer:
           children.add(const _Printer());
-          break;
-        case SettingsTabKey.about:
-          children.add(const _About());
           break;
       }
     }
@@ -277,11 +247,12 @@ class _DesktopSettingPageState extends State<DesktopSettingPage>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: _buildBlock(
         children: <Widget>[
-          SizedBox(
+          Container(
             width: _kTabWidth,
+            color: Theme.of(context).scaffoldBackgroundColor,
             child: Column(
               children: [
                 _header(context),
@@ -414,7 +385,6 @@ class _GeneralState extends State<_General> {
     return ListView(
       controller: scrollController,
       children: [
-        if (!isWeb) service(),
         theme(),
         _Card(title: 'Language', children: [language()]),
         if (!isWeb) hwcodec(),
@@ -820,6 +790,17 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
   final scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    if (bind.mainGetOptionSync(key: kOptionAccessMode) != 'full') {
+      Future.microtask(() async {
+        await bind.mainSetOption(key: kOptionAccessMode, value: 'full');
+        setState(() {});
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return SingleChildScrollView(
@@ -835,9 +816,6 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
               child: Column(children: [
                 permissions(context),
                 password(context),
-                _Card(title: '2FA', children: [tfa()]),
-                if (!isChangeIdDisabled())
-                  _Card(title: 'ID', children: [changeId()]),
                 more(context),
               ]),
             ),
@@ -974,34 +952,10 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
   }
 
   Widget permissions(context) {
-    bool enabled = !locked;
     // Simple temp wrapper for PR check
     tmpWrapper() {
-      String accessMode = bind.mainGetOptionSync(key: kOptionAccessMode);
-      _AccessMode mode;
-      if (accessMode == 'full') {
-        mode = _AccessMode.full;
-      } else if (accessMode == 'view') {
-        mode = _AccessMode.view;
-      } else {
-        mode = _AccessMode.custom;
-      }
-      String initialKey;
-      bool? fakeValue;
-      switch (mode) {
-        case _AccessMode.custom:
-          initialKey = '';
-          fakeValue = null;
-          break;
-        case _AccessMode.full:
-          initialKey = 'full';
-          fakeValue = true;
-          break;
-        case _AccessMode.view:
-          initialKey = 'view';
-          fakeValue = false;
-          break;
-      }
+      const String initialKey = 'full';
+      const bool? fakeValue = true;
 
       return _Card(title: 'Permissions', children: [
         ComboBox(
@@ -1015,48 +969,45 @@ class _SafetyState extends State<_Safety> with AutomaticKeepAliveClientMixin {
               translate('Full Access'),
               translate('Screen Share'),
             ],
-            enabled: enabled && !isOptionFixed(kOptionAccessMode),
+            enabled: false,
             initialKey: initialKey,
-            onChanged: (mode) async {
-              await bind.mainSetOption(key: kOptionAccessMode, value: mode);
-              setState(() {});
-            }).marginOnly(left: _kContentHMargin),
+            onChanged: (_) {}).marginOnly(left: _kContentHMargin),
         Column(
           children: [
             _OptionCheckBox(
                 context, 'Enable keyboard/mouse', kOptionEnableKeyboard,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             if (isWindows)
               _OptionCheckBox(
                   context, 'Enable remote printer', kOptionEnableRemotePrinter,
-                  enabled: enabled, fakeValue: fakeValue),
+                  enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(context, 'Enable clipboard', kOptionEnableClipboard,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(
                 context, 'Enable file transfer', kOptionEnableFileTransfer,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(context, 'Enable audio', kOptionEnableAudio,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(context, 'Enable camera', kOptionEnableCamera,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(context, 'Enable terminal', kOptionEnableTerminal,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(
                 context, 'Enable TCP tunneling', kOptionEnableTunnel,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(
                 context, 'Enable remote restart', kOptionEnableRemoteRestart,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(
                 context, 'Enable recording session', kOptionEnableRecordSession,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
             if (isWindows)
               _OptionCheckBox(context, 'Enable blocking user input',
                   kOptionEnableBlockInput,
-                  enabled: enabled, fakeValue: fakeValue),
+                  enabled: false, fakeValue: fakeValue),
             _OptionCheckBox(context, 'Enable remote configuration modification',
                 kOptionAllowRemoteConfigModification,
-                enabled: enabled, fakeValue: fakeValue),
+                enabled: false, fakeValue: fakeValue),
           ],
         ),
       ]);
@@ -2297,22 +2248,18 @@ class _AboutState extends State<_About> {
   @override
   Widget build(BuildContext context) {
     return futureBuilder(future: () async {
-      final license = await bind.mainGetLicense();
       final version = await bind.mainGetVersion();
       final buildDate = await bind.mainGetBuildDate();
       final fingerprint = await bind.mainGetFingerprint();
       return {
-        'license': license,
         'version': version,
         'buildDate': buildDate,
         'fingerprint': fingerprint
       };
     }(), hasData: (data) {
-      final license = data['license'].toString();
       final version = data['version'].toString();
       final buildDate = data['buildDate'].toString();
       final fingerprint = data['fingerprint'].toString();
-      const linkStyle = TextStyle(decoration: TextDecoration.underline);
       final scrollController = ScrollController();
       return SingleChildScrollView(
         controller: scrollController,
@@ -2333,49 +2280,6 @@ class _AboutState extends State<_About> {
                 SelectionArea(
                     child: Text('${translate('Fingerprint')}: $fingerprint')
                         .marginSymmetric(vertical: 4.0)),
-              InkWell(
-                  onTap: () {
-                    launchUrlString('https://rustdesk.com/privacy.html');
-                  },
-                  child: Text(
-                    translate('Privacy Statement'),
-                    style: linkStyle,
-                  ).marginSymmetric(vertical: 4.0)),
-              InkWell(
-                  onTap: () {
-                    launchUrlString('https://rustdesk.com');
-                  },
-                  child: Text(
-                    translate('Website'),
-                    style: linkStyle,
-                  ).marginSymmetric(vertical: 4.0)),
-              Container(
-                decoration: const BoxDecoration(color: Color(0xFF2c8cff)),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-                child: SelectionArea(
-                    child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Copyright © ${DateTime.now().toString().substring(0, 4)} Purslane Ltd.\n$license',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          Text(
-                            translate('Slogan_tip'),
-                            style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white),
-                          )
-                        ],
-                      ),
-                    ),
-                  ],
-                )),
-              ).marginSymmetric(vertical: 4.0)
             ],
           ).marginOnly(left: _kContentHMargin)
         ]),
@@ -2549,8 +2453,8 @@ class _WaylandCardState extends State<WaylandCard> {
   //   busctl --user call org.freedesktop.impl.portal.PermissionStore \
   //   /org/freedesktop/impl/portal/PermissionStore org.freedesktop.impl.portal.PermissionStore \
   //   DeletePermission sss "gnome" "shortcuts-inhibitor" "<desktop-id>"
-  // On a native install this is typically "rustdesk.desktop"; on Flatpak it is usually
-  // the exported desktop ID derived from the Flatpak app-id (e.g. "com.rustdesk.RustDesk.desktop").
+  // On a native install this is typically "RustDesk.desktop"; on Flatpak it is usually
+  // the exported desktop ID derived from the Flatpak app-id (e.g. "com.RustDesk.RustDesk.desktop").
   //
   // We may add it back in the future if needed.
   final showResetInhibitorPermission = false;

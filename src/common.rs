@@ -53,7 +53,7 @@ pub enum GrabState {
 pub type NotifyMessageBox = fn(String, String, String, String) -> dyn Future<Output = ()>;
 
 // the executable name of the portable version
-pub const PORTABLE_APPNAME_RUNTIME_ENV_KEY: &str = "RUSTDESK_APPNAME";
+pub const PORTABLE_APPNAME_RUNTIME_ENV_KEY: &str = "RustDesk_APPNAME";
 
 pub const PLATFORM_WINDOWS: &str = "Windows";
 pub const PLATFORM_LINUX: &str = "Linux";
@@ -956,11 +956,11 @@ pub fn check_software_update() {
 }
 
 // No need to check `danger_accept_invalid_cert` for now.
-// Because the url is always `https://api.rustdesk.com/version/latest`.
+// Because the url is always `https://api.RustDesk.com/version/latest`.
 #[tokio::main(flavor = "current_thread")]
 pub async fn do_check_software_update() -> hbb_common::ResultType<()> {
     let (request, url) =
-        hbb_common::version_check_request(hbb_common::VER_TYPE_RUSTDESK_CLIENT.to_string());
+        hbb_common::version_check_request(hbb_common::VER_TYPE_RustDesk_CLIENT.to_string());
     let proxy_conf = Config::get_socks();
     let tls_url = get_url_for_tls(&url, &proxy_conf);
     let tls_type = get_cached_tls_type(tls_url);
@@ -1012,7 +1012,7 @@ pub fn get_app_name() -> String {
 }
 
 #[inline]
-pub fn is_rustdesk() -> bool {
+pub fn is_RustDesk() -> bool {
     hbb_common::config::APP_NAME.read().unwrap().eq("RustDesk")
 }
 
@@ -1078,11 +1078,14 @@ fn get_api_server_(api: String, custom: String) -> String {
     if !api.is_empty() {
         return api.to_owned();
     }
-    let s0 = get_custom_rendezvous_server(custom);
+    let mut s0 = get_custom_rendezvous_server(custom);
+    if s0.is_empty() {
+        s0 = hbb_common::config::Config::get_rendezvous_server();
+    }
     if !s0.is_empty() {
-        let s = crate::increase_port(&s0, -2);
+        let s = crate::increase_port(&s0, 1);
         if s == s0 {
-            return format!("http://{}:{}", s, config::RENDEZVOUS_PORT - 2);
+            return format!("http://{}:{}", s, config::API_PORT);
         } else {
             return format!("http://{}", s);
         }
@@ -1092,8 +1095,8 @@ fn get_api_server_(api: String, custom: String) -> String {
 
 #[inline]
 pub fn is_public(url: &str) -> bool {
-    url.contains("rustdesk.com/")
-        || url.ends_with("rustdesk.com")
+    url.contains("RustDesk.com/")
+        || url.ends_with("RustDesk.com")
         || config::RENDEZVOUS_SERVERS.iter().any(|s| url.contains(s))
 }
 
@@ -1786,7 +1789,7 @@ impl ThrottledInterval {
 pub type RustDeskInterval = ThrottledInterval;
 
 #[inline]
-pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
+pub fn RustDesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
@@ -2367,7 +2370,7 @@ mod tests {
         for maker in base_intervals.into_iter() {
             let mut tokio_timer = maker();
             let mut tokio_times = Vec::new();
-            let mut timer = rustdesk_interval(maker());
+            let mut timer = RustDesk_interval(maker());
             let mut times = Vec::new();
             loop {
                 tokio::select! {
@@ -2414,7 +2417,7 @@ mod tests {
     async fn test_RustDesk_interval_sleep() {
         let base_intervals = [interval_maker, interval_at_maker];
         for (i, maker) in base_intervals.into_iter().enumerate() {
-            let mut timer = rustdesk_interval(maker());
+            let mut timer = RustDesk_interval(maker());
             let mut times = Vec::new();
             sleep(Duration::from_secs(3)).await;
             loop {
@@ -2472,25 +2475,25 @@ mod tests {
 
     #[test]
     fn test_is_public() {
-        // Test URLs containing "rustdesk.com/"
-        assert!(is_public("https://rustdesk.com/"));
-        assert!(is_public("https://www.rustdesk.com/"));
-        assert!(is_public("https://api.rustdesk.com/v1"));
-        assert!(is_public("https://rustdesk.com/path"));
+        // Test URLs containing "RustDesk.com/"
+        assert!(is_public("https://RustDesk.com/"));
+        assert!(is_public("https://www.RustDesk.com/"));
+        assert!(is_public("https://api.RustDesk.com/v1"));
+        assert!(is_public("https://RustDesk.com/path"));
 
-        // Test URLs ending with "rustdesk.com"
-        assert!(is_public("rustdesk.com"));
-        assert!(is_public("https://rustdesk.com"));
-        assert!(is_public("http://www.rustdesk.com"));
-        assert!(is_public("https://api.rustdesk.com"));
+        // Test URLs ending with "RustDesk.com"
+        assert!(is_public("RustDesk.com"));
+        assert!(is_public("https://RustDesk.com"));
+        assert!(is_public("http://www.RustDesk.com"));
+        assert!(is_public("https://api.RustDesk.com"));
 
         // Test non-public URLs
         assert!(!is_public("https://example.com"));
         assert!(!is_public("https://custom-server.com"));
         assert!(!is_public("http://192.168.1.1"));
         assert!(!is_public("localhost"));
-        assert!(!is_public("https://rustdesk.computer.com"));
-        assert!(!is_public("rustdesk.comhello.com"));
+        assert!(!is_public("https://RustDesk.computer.com"));
+        assert!(!is_public("RustDesk.comhello.com"));
     }
 
     #[test]

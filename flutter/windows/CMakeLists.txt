@@ -1,10 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project(rustdesk LANGUAGES CXX)
+project(RustDesk LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "rustdesk")
+set(BINARY_NAME "RustDesk")
 
 # Explicitly opt into modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -70,6 +70,12 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+add_custom_target(rustdesk_core ALL
+  COMMAND cargo build --features flutter --lib $<$<OR:$<CONFIG:Release>,$<CONFIG:Profile>>:--release>
+  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../.."
+)
+add_dependencies(${BINARY_NAME} rustdesk_core)
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
@@ -101,11 +107,11 @@ if(PLUGIN_BUNDLED_LIBRARIES)
 endif()
 
 # flutter_rust_bridge
-set(RUSTDESK_LIB_BUILD_TYPE $<IF:$<CONFIG:Debug>,debug,release>)
-message(STATUS "rustdesk lib build type: ${RUSTDESK_LIB_BUILD_TYPE}")
-set(RUSTDESK_LIB "../../target/${RUSTDESK_LIB_BUILD_TYPE}/librustdesk.dll")
-install(FILES "${RUSTDESK_LIB}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
-COMPONENT Runtime RENAME librustdesk.dll)
+set(RustDesk_LIB_BUILD_TYPE $<IF:$<CONFIG:Debug>,debug,release>)
+message(STATUS "RustDesk lib build type: ${RustDesk_LIB_BUILD_TYPE}")
+set(RustDesk_LIB "../../target/${RustDesk_LIB_BUILD_TYPE}/libRustDesk.dll")
+install(FILES "${RustDesk_LIB}" DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+COMPONENT Runtime RENAME libRustDesk.dll)
 
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.

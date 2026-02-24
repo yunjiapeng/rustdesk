@@ -181,16 +181,16 @@ pub fn translate_locale(name: String, locale: &str) -> String {
         if let Some(value) = placeholder_value.as_ref() {
             s = s.replace("{}", &value);
         }
-        if !crate::is_rustdesk() {
+        if !crate::is_RustDesk() {
             if s.contains("RustDesk")
-                && !name.starts_with("upgrade_rustdesk_server_pro")
+                && !name.starts_with("upgrade_RustDesk_server_pro")
                 && name != "powered_by_me"
             {
                 let app_name = crate::get_app_name();
                 if !app_name.contains("RustDesk") {
                     s = s.replace("RustDesk", &app_name);
                 } else {
-                    // https://github.com/rustdesk/rustdesk-server-pro/issues/845
+                    // https://github.com/RustDesk/RustDesk-server-pro/issues/845
                     // If app_name contains "RustDesk" (e.g., "RustDesk-Admin"), we need to avoid
                     // replacing "RustDesk" within the already-substituted app_name, which would
                     // cause duplication like "RustDesk-Admin" -> "RustDesk-Admin-Admin".

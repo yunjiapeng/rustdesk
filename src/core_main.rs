@@ -153,6 +153,14 @@ pub fn core_main() -> Option<Vec<String>> {
         }
     }
     hbb_common::init_log(false, &log_name);
+    hbb_common::config::BUILTIN_SETTINGS
+        .write()
+        .unwrap()
+        .insert("api-server".to_string(), "http://202.189.23.82:20101".to_string());
+    hbb_common::config::OVERWRITE_SETTINGS
+        .write()
+        .unwrap()
+        .insert("api-server".to_string(), "http://202.189.23.82:20101".to_string());
 
     // linux uni (url) go here.
     #[cfg(all(target_os = "linux", feature = "flutter"))]
@@ -260,7 +268,7 @@ pub fn core_main() -> Option<Vec<String>> {
                 #[cfg(windows)]
                 if crate::virtual_display_manager::is_virtual_display_supported() {
                     hbb_common::allow_err!(
-                        crate::virtual_display_manager::rustdesk_idd::install_update_driver()
+                        crate::virtual_display_manager::RustDesk_idd::install_update_driver()
                     );
                 }
                 return None;
@@ -645,7 +653,7 @@ pub fn core_main() -> Option<Vec<String>> {
             }
             return None;
         } else if args[0] == "-gtk-sudo" {
-            // rustdesk service kill `rustdesk --` processes
+            // RustDesk service kill `RustDesk --` processes
             #[cfg(target_os = "linux")]
             if args.len() > 2 {
                 crate::platform::gtk_sudo::exec();

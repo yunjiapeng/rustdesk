@@ -59,7 +59,7 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
           setResizable(false);
         } else {
           windowManager.setSize(getIncomingOnlySettingsSize());
-          setResizable(true);
+          setResizable(false);
         }
       };
     }
@@ -68,6 +68,7 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
   @override
   void initState() {
     super.initState();
+    stateGlobal.showTabBar.value = false;
     // HardwareKeyboard.instance.addHandler(_handleKeyEvent);
   }
 
@@ -94,17 +95,68 @@ class _DesktopTabPageState extends State<DesktopTabPage> {
     final tabWidget = Container(
         child: Scaffold(
             backgroundColor: Theme.of(context).colorScheme.background,
-            body: DesktopTab(
-              controller: tabController,
-              tail: Offstage(
-                offstage: bind.isIncomingOnly() || bind.isDisableSettings(),
-                child: ActionIcon(
-                  message: 'Settings',
-                  icon: IconFont.menu,
-                  onTap: DesktopTabPage.onAddSetting,
-                  isClose: false,
+            body: Stack(
+              children: [
+                Positioned.fill(
+                  child: DesktopTab(
+                    controller: tabController,
+                    showLogo: false,
+                    showTitle: false,
+                    showMinimize: false,
+                    showMaximize: false,
+                    showClose: true,
+                    tail: Offstage(
+                      offstage: bind.isIncomingOnly() || bind.isDisableSettings(),
+                      child: ActionIcon(
+                        message: 'Settings',
+                        icon: IconFont.menu,
+                        onTap: DesktopTabPage.onAddSetting,
+                        isClose: false,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  top: 10,
+                  left: 0,
+                  right: 10,
+                  child: SizedBox(
+                    height: 28,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onPanStart: (_) => windowManager.startDragging(),
+                            child: SizedBox(height: 28),
+                          ),
+                        ),
+                        if (!isMacOS)
+                          Row(
+                            children: [
+                              ActionIcon(
+                                message: 'Minimize',
+                                icon: IconFont.min,
+                                onTap: () => windowManager.minimize(),
+                                isClose: false,
+                                iconSize: 20,
+                                boxSize: 32,
+                              ),
+                              ActionIcon(
+                                message: 'Close',
+                                icon: IconFont.close,
+                                onTap: () => windowManager.close(),
+                                isClose: true,
+                                iconSize: 20,
+                                boxSize: 32,
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             )));
     return isMacOS || kUseCompatibleUiMode
         ? tabWidget
